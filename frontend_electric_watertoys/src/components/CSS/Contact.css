@@ -1,0 +1,92 @@
+/* Style général */
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+.full-page {
+  background-image: url('C:/Users/ZHU Sophie/electric_watertoys/public/images/fond_ocean.jpg'); /* Utilisez des slashs (/) pour les chemins de fichier */
+  background-size: cover; /* Utilisez 'cover' pour adapter l'image à l'écran */
+  background-repeat: no-repeat; /* Évitez la répétition de l'image */
+  background-position: center; 
+  
+}
+
+/* Contact Section Styles */
+.contact-section {
+  padding: 2rem;
+  text-align: center;
+}
+
+.contact-section h1 {
+  color: #00519c;
+  margin-bottom: 1rem;
+}
+
+.contact-info {
+  margin-bottom: 2rem;
+}
+
+.contact-info p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #ffffff; /* Texte en blanc */
+}
+
+.contact-info .information {
+  font-weight: bold;
+  color: #2ae6ed; /* Texte en blanc */
+}
+
+/* Map Styles */
+.map {
+  width: 100%;
+  height: 400px;
+  border: 0;
+  margin-bottom: 2rem;
+}
+
+/* Form Styles */
+.form {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.form form {
+  width: 100%;
+  max-width: 500px;
+  text-align: left;
+}
+
+.form label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #b7dcff;
+}
+
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form input[type="submit"] {
+  background-color: #8cc7ff;
+  color: white;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s;
+}
+
+.form input[type="submit"]:hover {
+  background-color: #0b1a4d;
+}

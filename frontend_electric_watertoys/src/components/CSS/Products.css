@@ -1,0 +1,98 @@
+/* Style principal pour le container */
+.products-container main {
+  background-color: #f9f9f9; /* Couleur de fond douce */
+  padding: 60px; /* Ajoute de l'espace autour du contenu */
+  font-family: 'Arial', sans-serif; /* Police propre et lisible */
+}
+
+/* Style spécifique à la page Products */
+.products-main {
+  width: auto; /* Pas de largeur forcée */
+  padding: 60px; /* Maintient l'espacement */
+}
+
+/* Style pour la section d'introduction des produits */
+.introduction-product {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #333; /* Couleur pour le texte */
+  text-align: center;
+}
+
+.introduction-product h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.introduction-product h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.introduction-product h3 {
+  font-size: 1.5rem;
+  color: #007BFF;
+  margin-top: 15px;
+}
+
+/* Style pour la liste des produits */
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px; /* Espacement entre les produits */
+  margin-top: 40px;
+}
+
+.product-item {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+}
+
+.product-item h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.product-item p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.product-item button {
+  background-color: #007BFF;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.product-item button:hover {
+  background-color: #0056b3;
+}
+
+/* Panier */
+.cart {
+  margin-top: 40px;
+  background: #fefefe;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.cart-total {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 20px;
+  color: #333;
+}
+

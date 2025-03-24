@@ -1,0 +1,422 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden; /* Ensure there's no horizontal scrolling */
+  }
+  
+  .home-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure the container takes the full height of the viewport */
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: white; /* Set the background color to white */
+  }
+  
+  main {
+    flex: 1; /* Take up the remaining space between the header and footer */
+    width: 100%; /* Ensure the main section uses full width */
+  }
+  
+  .header-content {
+    position: absolute;
+    top: 60%;
+    left: 25%;
+    transform: translate(-50%, -50%);
+    color: white;
+    z-index: 1;
+  }
+  
+  .header-content h1 {
+    font-size: 2.5rem;
+  }
+  
+  .info-button {
+    position: absolute;
+    left: 5px;
+    padding: 0.5rem 2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    background: rgba(0, 123, 167, 0.6);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+  
+  .info-button:hover {
+    background: #172967;
+  }
+  
+  .promo-section {
+    position: relative;
+    width: 100%; /* Ensure the promo section uses full width */
+  }
+  
+  .fullscreen-video {
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+  }
+  
+  .video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .introduction {
+    padding: 2rem 1rem;
+    background-color: white;
+    text-align: center; 
+  }
+  
+  .introduction h4 {
+    font-size: 25px;
+    margin-top: 1rem;
+  }
+  
+  .introduction h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 50px;
+    color: #172967; /* Apply a consistent color for headers */
+  }
+  
+  .introduction h3 {
+    margin-bottom: 5rem;
+    font-size: 15px;
+  }
+  
+  .intro-text {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .intro-text p {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    margin: 0 1rem;
+    width: 45%; /* Adjust the width to ensure they sit side by side */
+    text-align: left; /* Align text to the left */
+    margin-bottom: 20px;
+  }
+  
+  .highlight { font-weight: bold; /* Apply bold styling to highlighted text */
+  }
+  
+  .image-banner {
+    position: relative;
+    width: 100%;
+    height: 60vh; /* Ajustez la hauteur selon vos besoins */
+    background-image: url('https://foilelectrique.fr/wp-content/uploads/2024/12/pratique_scooter_sous_marin.jpg'); /* Utilisez le chemin absolu depuis le dossier public */
+    background-size: cover;
+    background-attachment: fixed; /* Effet de parallax */
+    background-position: center;
+    display: flex;
+    align-items: flex-end; /* Aligner le contenu en bas */
+    justify-content: flex-start; /* Aligner le contenu à gauche */
+    color: white; /* Assurez-vous que le texte est blanc */
+    text-align: left; /* Aligner le texte à gauche */
+  }
+  
+  .image-banner h2 {
+    font-size: 35px; /* Ajustez la taille de la police selon vos besoins */
+    margin: 0; /* Supprimez la marge par défaut */
+    font-weight: bold; /* Mettre le texte en gras */
+    font-family:'Segoe UI', Tahoma, sans-serif;
+  }
+  
+  .image-banner h3 {
+    font-size: 25px; /* Ajustez la taille de la police selon vos besoins */
+    margin-bottom: 15px; /* Supprimez la marge par défaut */
+    font-weight: normal; /* Texte régulier */
+  
+  }
+  
+  .image-banner .image-overlay {
+    position: absolute;
+    top: 230px;
+    left: 150px;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  
+  .image-banner .image-banner-content {
+    position: relative;
+    z-index: 2;
+    padding: 2rem;
+  }
+  
+  @media screen and (max-width: 768px) {
+    .image-banner {
+      height: auto;
+    }
+  }
+  
+  .info-section {
+    display: flex;
+    justify-content: space-around;
+    background-color: #ffffff;
+    padding: 2rem 1rem;
+  }
+  
+  .info-box {
+    text-align: center;
+    max-width: 250px;
+  }
+  
+  .info-box img {
+    height: 50px;
+    margin-bottom: 1rem;
+    border-radius: 15px;
+  }
+  
+  .info-box h3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .info-box p {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  .featured-products {
+    background-color: white;
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+  
+  .featured-products h2 {
+    font-size: 2.7rem; /* Agrandir le titre de la page */
+    margin-bottom: 1rem;
+    color: #172967; /* Couleur du titre */
+  }
+  
+  .featured-products p {
+    font-size: 1.2rem; /* Taille de police pour la description */
+    color: #000; /* Mettre le texte en noir */
+    margin-bottom: 70px;
+  }
+  
+  .product-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 1rem; /* Espacement entre les sections */
+  }
+  
+  .product {
+    text-align: center;
+    max-width: 250px; /* Ajuster la taille pour correspondre à l'image de référence */
+    margin-bottom: 0; /* Supprimer l'espacement entre les images produits */
+  }
+  
+  .product img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 0; /* Supprimer l'espacement entre les images produits */
+  }
+  
+  .product h3 {
+    font-size: 1.2rem; /* Taille de police pour le titre du produit */
+    color: #172967; /* Couleur du titre du produit */
+    margin-bottom: 5rem;
+  }
+  
+  .see-more {
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  .see-more a {
+    text-decoration: none;
+    color: #000; /* Mettre "See More" en noir */
+    font-size: 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.3s ease;
+  }
+  
+  .see-more a:hover {
+    color: #444; /* Couleur de survol */
+  }
+  
+  .see-more .arrow {
+    margin-left: 0.5rem;
+    width: 30px; /* Agrandir la flèche */
+    height: auto;
+    transition: transform 0.3s ease;
+  }
+  
+  .see-more a:hover .arrow {
+    transform: translateX(5px);
+  }
+  
+  @media screen and (max-width: 768px) {
+    .product-grid {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .product {
+      width: 80%;
+      max-width: none;
+    }
+  }
+  
+  .Titre-section h2 {
+    font-size: 2.7rem; /* Agrandir le titre de la page */
+    margin-bottom: 1rem;
+    color: rgba(23, 41, 103, 0.5); /* Couleur bleu translucide */
+    font-style: italic; /* Mettre le texte en italique */
+  }
+  
+  .Titre-section h3 {
+    font-size: 2rem; /* Agrandir le titre de la page */
+    margin-bottom: 3em;
+    color: #172967; /* Couleur du titre */
+    animation: fadeInUp 2s ease-in-out infinite; /* Ajouter l'animation en boucle infinie */
+    animation-direction: alternate; /* Alterner l'animation pour un mouvement fluide */
+  }
+  
+  /* Définir l'animation */
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  
+  .water-toys-section .item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .water-toys-section .item .text {
+    flex: 1;
+    padding: 1rem;
+    text-align: center; /* Centrer le texte */
+  }
+  
+  .water-toys-section .item h3 { 
+    font-size: 1.5rem; /* Réduire la taille des titres */ 
+    margin-bottom: 3rem; 
+  } 
+  
+  .water-toys-section .item p {
+    font-size: 1rem; /* Taille du texte des paragraphes */
+    line-height: 1.2; /* Réduire la hauteur de ligne pour compacter le texte */
+    max-width: 600px; /* Limiter la largeur des paragraphes */
+    margin: 0 auto 0.5rem auto; /* Centrer et espacer les paragraphes */
+  }
+  
+  .water-toys-section .image-ex-1, .image-ex-3 {
+    flex: 1;
+    width: 90%; /* Réduire la largeur pour ajouter un espace à gauche */
+    margin-left: 15px; /* Ajouter un espace à gauche */
+    height: 100%;
+    object-fit: cover; /* Maintenir les proportions de l'image */
+  }
+  
+  .water-toys-section .image-ex-2 {
+    flex: 1;
+    width: 90%; /* Réduire la largeur pour ajouter un espace à droite */
+    margin-right: 15px; /* Ajouter un espace à droite */
+    height: 100%;
+    object-fit: cover; /* Maintenir les proportions de l'image */
+  }
+  
+  .water-toys-section .item:nth-child(2) {
+    flex-direction: row-reverse; /* Inverser le texte et l'image pour la section "Safety and Durability" */
+  }
+  
+  @media screen and (max-width: 768px) {
+    .water-toys-section .item {
+      flex-direction: column;
+      text-align: center;
+    }
+  
+    .water-toys-section .item .text, .water-toys-section .item img {
+      max-width: 100%;
+    }
+  
+    .water-toys-section .image-ex-1, .water-toys-section .image-ex-2, .water-toys-section .image-ex-3 {
+      margin: 0; /* Supprimer les marges sur les petits écrans */
+      width: 100%;
+    }
+  }
+  
+  
+  .product-benefits {
+    background-color: #e0f7fa;
+    padding: 2rem 1rem;
+  }
+  
+  .product-benefits h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .benefit {
+    display: flex;
+    margin-bottom: 2rem;
+  }
+  
+  .benefit img {
+    height: 100px;
+    border-radius: 15px;
+    margin-right: 1rem;
+  }
+  
+  .benefit-info {
+    max-width: 600px;
+    text-align: left;
+  }
+  
+  .benefit h3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .testimonials {
+    background-color: #e0f7fa;
+    padding: 2rem 1rem;
+  }
+  
+  .testimonials h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .testimonial {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 1rem auto;
+  }
+  
+  .testimonial p {
+    font-style: italic;
+    margin-bottom: 0.5rem;
+  }
+  
+  .testimonial h4 {
+    margin: 0;
+    font-size: 1rem;
+  }
+  

@@ -1,0 +1,178 @@
+/* Style pour le lien actif */
+.active-link {
+    font-weight: bold;
+    text-decoration: underline;
+    color: #00CED1; /* Cyan */
+}
+
+/* Style pour l'entête */
+.home-header {
+    background-color: rgb(15, 9, 47); /* Bleu foncé */
+}
+
+/* Style pour la barre de navigation */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    align-items: center;
+}
+
+/* Style pour le logo du site */
+.nav-logo {
+    display: flex;
+    align-items: center;
+}
+
+.nav-logo img {
+    height: 70px;
+    margin-right: 10px;
+    border-radius: 5px; /* Coins arrondis */
+}
+
+.site-title {
+    color: white;
+    font-size: 2rem;
+}
+
+/* Style pour les liens */
+.nav-links-container {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin: 0 1rem;
+}
+
+/* Lien de navigation */
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    position: relative; /* Nécessaire pour le style hover */
+    transition: color 0.3s ease; /* Effet au survol */
+}
+
+.nav-links a:hover {
+    color: #4ac3f3; /* Change la couleur du texte au survol */
+}
+
+/* Ajouter un soulignement dynamique au survol */
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background-color: #4ac3f3; /* Couleur cyan */
+    transition: width 0.3s ease; /* Animation d'extension */
+}
+
+.nav-links a:hover::after {
+    width: 100%; /* L'étend sur toute la largeur au survol */
+}
+
+/* Style pour les icônes sociales */
+.social-icons {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+.social-icons a {
+    margin: 0;
+    padding: 0;
+}
+
+.social-icon {
+    height: 30px;
+    width: 30px;
+    border-radius: 8px;
+    margin: 0 8px; /* Espacement horizontal */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.social-icon:hover {
+    transform: scale(1.1); /* Agrandissement au survol */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Ombre douce */
+}
+
+/* Style pour le séparateur */
+.separator {
+    color: white;
+    font-size: 1.5rem;
+    margin: 0 10px;
+}
+
+/* Style pour l'icône du panier */
+.cart-container {
+    position: relative; /* Nécessaire pour positionner la popup */
+    cursor: pointer;
+}
+
+.cart-icon {
+    height: 30px; /* Taille de l'icône du panier */
+    width: 30px;
+    border-radius: 5px;
+}
+
+/* Style pour la popup du panier */
+.cart-popup {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    z-index: 10;
+}
+
+.cart-popup h4 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.cart-popup ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cart-popup li {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+/* Style pour l'icône de connexion */
+.login-container {
+  cursor: pointer; /* Indique que c'est cliquable */
+  margin-right: 33px;
+  margin-left: 10px;
+}
+
+.login-icon {
+  height: 30px; /* Taille de l'icône */
+  width: 30px;
+  border-radius: 8px; /* Coins légèrement arrondis */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Effet au survol */
+}
+
+.login-icon:hover {
+  transform: scale(1.1); /* Agrandit légèrement au survol */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Ajoute une ombre douce au survol */
+}

@@ -1,0 +1,26 @@
+.site-footer {
+    background-color: rgb(15, 9, 47);
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    width: 100%;
+  }
+  
+  .footer-social-icons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .social-icon {
+    height: 30px;
+    width: 30px;
+    margin: 0 0px; /* Margin on both sides */
+    border-radius: 19px;
+    padding: 5px;
+  }
+  
+  .social-icon:hover {
+    background: #172967;
+  }
+  
