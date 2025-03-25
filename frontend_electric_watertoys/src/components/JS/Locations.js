@@ -124,7 +124,7 @@ const Locations = () => {
         
         <section className="locations-info">
           <div className="info-content">
-            <h2>Visit Us Today</h2>
+            <h2  className="titre">Visit Us Today</h2>
             <p>Book a test session or training at any of our locations. <br></br><br></br>Our expert staff will guide you through our product range and help you find the perfect water toy for your needs.</p>
           </div>
         </section>

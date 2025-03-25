@@ -9,11 +9,20 @@ async function initAdmin() {
       where: {
         isAdmin: true
       },
-      attributes: ['id', 'firstName', 'lastName', 'email', 'password', 'isAdmin', 'address', 'phone', 'createdAt', 'updatedAt', 'username']
+      attributes: ['id', 'firstName', 'lastName', 'email', 'password', 'isAdmin', 'address', 'phone', 'createdAt', 'updatedAt', 'username', 'role']
     });
 
     if (adminExists) {
-      console.log('Un administrateur existe déjà');
+      console.log('Un administrateur existe déjà:', adminExists.email);
+      
+      // S'assurer que le rôle est cohérent avec isAdmin
+      if (adminExists.role !== 'admin') {
+        console.log('Mise à jour du rôle administrateur pour assurer la cohérence');
+        adminExists.role = 'admin';
+        await adminExists.save();
+        console.log('Rôle administrateur mis à jour avec succès');
+      }
+      
       return;
     }
 
@@ -25,6 +34,7 @@ async function initAdmin() {
       username: 'admin', // Ajout du champ username qui est maintenant obligatoire
       password: bcrypt.hashSync('Admin@123', 10),
       isAdmin: true,
+      role: 'admin', // S'assurer que le rôle est explicitement défini
       address: 'Electric Water Toys HQ',
       phone: '0927514892'
     });

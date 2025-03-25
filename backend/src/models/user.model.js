@@ -54,5 +54,22 @@ module.exports = (sequelize, Sequelize) => {
     }
   });
 
+  // Hook pour synchroniser role et isAdmin
+  User.beforeCreate(user => {
+    if (user.isAdmin === true) {
+      user.role = 'admin';
+    } else if (user.role === 'admin') {
+      user.isAdmin = true;
+    }
+  });
+
+  User.beforeUpdate(user => {
+    if (user.changed('isAdmin') && user.isAdmin === true) {
+      user.role = 'admin';
+    } else if (user.changed('role') && user.role === 'admin') {
+      user.isAdmin = true;
+    }
+  });
+
   return User;
 };

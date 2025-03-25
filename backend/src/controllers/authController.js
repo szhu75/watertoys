@@ -60,16 +60,33 @@ exports.signin = async (req, res) => {
       });
     }
 
+    // S'assurer que le rôle est cohérent avec isAdmin
+    const role = user.isAdmin ? "admin" : "user";
+    
+    // Si l'utilisateur est admin mais que le rôle n'est pas correctement défini, mettre à jour
+    if (user.isAdmin && user.role !== "admin") {
+      user.role = "admin";
+      await user.save();
+    }
+
     // Générer un token JWT avec plus d'informations sur l'utilisateur
     const token = jwt.sign({ 
       id: user.id,
       email: user.email,
       isAdmin: user.isAdmin,
-      role: user.isAdmin ? "admin" : "user",
+      role: role,
       firstName: user.firstName,
       lastName: user.lastName
     }, config.secret, {
       expiresIn: config.jwtExpiration // durée configurée dans config/jwt.js
+    });
+
+    // Log pour déboguer
+    console.log("Utilisateur connecté:", {
+      id: user.id,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      role: role
     });
 
     res.status(200).send({
@@ -78,11 +95,12 @@ exports.signin = async (req, res) => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      role: user.isAdmin ? "admin" : "user",
+      role: role,
       isAdmin: user.isAdmin,
       accessToken: token
     });
   } catch (error) {
+    console.error("Erreur lors de la connexion:", error);
     res.status(500).send({ 
       message: "Erreur lors de la connexion",
       error: error.message 

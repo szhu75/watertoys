@@ -11,9 +11,13 @@ const PrivateRoute = ({ children, requiredRole }) => {
     return <Navigate to="/login" />;
   }
   
-  // Si un rôle spécifique est requis et que l'utilisateur n'a pas ce rôle
-  if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to="/" />;
+  // Si un rôle spécifique est requis
+  if (requiredRole === 'admin') {
+    // Vérifier à la fois role et isAdmin pour plus de sécurité
+    if (user.role !== 'admin' && user.isAdmin !== true) {
+      console.log("Accès refusé - L'utilisateur n'est pas admin", user);
+      return <Navigate to="/dashboard" />;
+    }
   }
   
   return children;

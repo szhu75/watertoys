@@ -1,4 +1,4 @@
-// src/components/JS/UserDashboard.js - Correction des doublons de commandes
+// src/components/JS/UserDashboard.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -332,6 +332,12 @@ const UserDashboard = () => {
     }
     
     setUser(userInfo);
+    
+    // Rediriger l'admin vers son tableau de bord
+    if (userInfo.role === 'admin' || userInfo.isAdmin === true) {
+      navigate('/admin-dashboard');
+      return;
+    }
     
     // Vérifier les paramètres d'URL pour le changement de section
     const searchParams = new URLSearchParams(location.search);

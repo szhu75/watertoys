@@ -144,14 +144,15 @@ export const AuthProvider = ({ children }) => {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await axios.post(`${apiUrl}/auth/signin`, credentials);
       
-      const { accessToken, id, email, role } = response.data;
+      const { accessToken, id, email, role, isAdmin, firstName, lastName } = response.data;
       
-      // Stocker le token et les informations utilisateur
+      // Stocker le token et les informations utilisateur complètes
       localStorage.setItem('token', accessToken);
-      localStorage.setItem('user', JSON.stringify({ id, email, role }));
+      localStorage.setItem('user', JSON.stringify({ id, email, role, isAdmin, firstName, lastName }));
+      console.log("Données utilisateur stockées:", { id, email, role, isAdmin, firstName, lastName });
       
       // Mettre à jour l'état d'authentification
-      setCurrentUser({ id, email, role });
+      setCurrentUser({ id, email, role, isAdmin, firstName, lastName });
       setIsAuthenticated(true);
       
       // Récupérer le panier de l'utilisateur
@@ -178,7 +179,8 @@ export const AuthProvider = ({ children }) => {
           return { 
             success: true, 
             pendingProductAdded: true,
-            message: "Connexion réussie et produit ajouté au panier"
+            message: "Connexion réussie et produit ajouté au panier",
+            isAdmin: role === 'admin' || isAdmin === true
           };
         } catch (err) {
           console.error('Erreur lors de l\'ajout du produit en attente:', err);
@@ -186,7 +188,11 @@ export const AuthProvider = ({ children }) => {
         }
       }
       
-      return { success: true, message: "Connexion réussie" };
+      return { 
+        success: true, 
+        message: "Connexion réussie",
+        isAdmin: role === 'admin' || isAdmin === true
+      };
     } catch (error) {
       console.error('Erreur lors de la connexion:', error);
       return { 

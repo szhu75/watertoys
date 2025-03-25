@@ -71,8 +71,20 @@ const LoginSignup = () => {
       }
 
       if (result.success) {
-        // La redirection sera gérée par le useEffect qui surveille isAuthenticated
+        // Redirection conditionnelle basée sur le rôle de l'utilisateur
         localStorage.setItem('justLoggedIn', 'true');
+        
+        // Récupérer les informations de l'utilisateur connecté
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        // Rediriger vers le tableau de bord approprié
+        if (user && (user.role === 'admin' || user.isAdmin === true)) {
+          console.log("Redirection vers le tableau de bord administrateur");
+          navigate('/admin-dashboard');
+        } else {
+          console.log("Redirection vers le tableau de bord utilisateur");
+          navigate('/dashboard');
+        }
       } else {
         setError(result.message);
       }
