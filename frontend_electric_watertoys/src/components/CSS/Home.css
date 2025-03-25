@@ -238,29 +238,33 @@ body, html {
     text-align: center;
     margin-top: 2rem;
     margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
   }
   
-  .see-more a {
-    text-decoration: none;
-    color: #000; /* Mettre "See More" en noir */
+  .see-more span {
     font-size: 1.2rem;
+    color: #000;
+  }
+  
+  .see-more-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    transition: color 0.3s ease;
-  }
-  
-  .see-more a:hover {
-    color: #444; /* Couleur de survol */
   }
   
   .see-more .arrow {
-    margin-left: 0.5rem;
-    width: 30px; /* Agrandir la flèche */
+    width: 30px;
     height: auto;
     transition: transform 0.3s ease;
   }
   
-  .see-more a:hover .arrow {
+  .see-more-btn:hover .arrow {
     transform: translateX(5px);
   }
   

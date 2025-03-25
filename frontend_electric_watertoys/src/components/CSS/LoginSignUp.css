@@ -1,0 +1,112 @@
+/* Style pour la page de connexion et d'inscription */
+.login-signup-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+    font-family: Arial, sans-serif;
+  }
+  
+  .form-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    text-align: center;
+  }
+  
+  .logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .logo-container .logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+  
+  .logo-container h1 {
+    color: #172967;
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  
+  .form-container h2 {
+    color: #172967;
+    margin-bottom: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: #172967;
+    box-shadow: 0 0 5px rgba(23, 41, 103, 0.3);
+  }
+  
+  .submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #172967;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit-btn:hover {
+    background-color: #0b1a4d;
+  }
+  
+  .error-message {
+    color: red;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+  }
+  
+  .toggle-form {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.9rem;
+  }
+  
+  .toggle-form span {
+    color: #172967;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 5px;
+  }
+  
+  .toggle-form span:hover {
+    text-decoration: underline;
+  }

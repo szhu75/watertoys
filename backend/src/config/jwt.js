@@ -1,6 +1,6 @@
- 
+// src/config/jwt.js
 module.exports = {
-    secret: process.env.JWT_SECRET || "X9f$mK2#pQ7zL4@jN6&wR3!bT5^hS8*",
-    jwtExpiration: 86400,           // 24 heures en secondes
-    jwtRefreshExpiration: 604800,   // 7 jours en secondes
-  };
+  secret: "X9f$mK2#pQ7zL4@jN6&wR3!bT5^hS8*",   // Changez cette clé en production!
+  jwtExpiration: "24h",                      // Token valide pendant 24 heures
+  jwtRefreshExpiration: "7d"                 // Token de rafraîchissement valide pendant 7 jours
+};

@@ -1,56 +1,42 @@
- 
+// server.js
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-const db = require('./models');
-const corsOptions = require('./config/corsOptions');
-const errorHandler = require('./middleware/errorHandler');
-require('dotenv').config();
+const db = require('./src/models');
+const corsOptions = require('./src/config/corsOptions');
+const authRoutes = require('./src/routes/auth.routes');
+const userRoutes = require('./src/routes/user.routes');
+const productRoutes = require('./src/routes/product.routes');
+const orderRoutes = require('./src/routes/order.routes');
+const cartRoutes = require('./src/routes/cart.routes');
 
-// Initialisation de l'application Express
 const app = express();
 
-// Middleware CORS pour permettre les requêtes cross-origin
+// Middlewares
 app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Parsing des requêtes de type application/json
-app.use(bodyParser.json());
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/cart', cartRoutes);
 
-// Parsing des requêtes de type application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Route simple pour tester l'API
-app.get('/', (req, res) => {
-  res.json({ message: 'Bienvenue sur l\'API Electric Watertoys.' });
+// Synchroniser la base de données
+db.sequelize.sync({ alter: true }).then(() => {
+  console.log('Base de données synchronisée');
+}).catch((err) => {
+  console.error('Erreur de synchronisation:', err);
 });
 
-// Importation et utilisation des routes
-require('./routes/auth.routes')(app);
-require('./routes/user.routes')(app);
-require('./routes/product.routes')(app);
-require('./routes/category.routes')(app);
-require('./routes/cart.routes')(app);
-require('./routes/order.routes')(app);
-require('./routes/discount.routes')(app);
+// Route racine
+app.get('/', (req, res) => {
+  res.json({ message: 'Bienvenue sur l\'API Electric Water Toys' });
+});
 
-// Middleware pour gérer les erreurs
-app.use(errorHandler);
-
-// Définition du port
-const PORT = process.env.PORT || 8080;
-
-// Synchronisation avec la base de données et démarrage du serveur
-db.sequelize.sync({ force: process.env.NODE_ENV === 'development' }).then(() => {
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Database synchronized in development mode.');
-    // Exécution des seeders si en mode développement
-    require('./seeders/category.seeder')();
-    require('./seeders/product.seeder')();
-  }
-  
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
-  });
-}).catch(err => {
-  console.error('Failed to synchronize database:', err);
+// Démarrer le serveur
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Serveur en cours d'exécution sur le port ${PORT}`);
 });

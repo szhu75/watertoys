@@ -1,79 +1,70 @@
+// src/middlewares/verifySignUp.js
 const db = require('../models');
 const User = db.user;
 
-// Validate username
-const checkDuplicateUsername = async (req, res, next) => {
+// Vérifier si l'email ou le nom d'utilisateur existe déjà
+checkDuplicateEmail = async (req, res, next) => {
   try {
-    // Check if username already exists
-    const existingUser = await User.findOne({
-      where: {
-        username: req.body.username
-      }
-    });
-
-    if (existingUser) {
-      return res.status(400).send({
-        message: "Failed! Username is already in use!"
-      });
-    }
-
-    next();
-  } catch (error) {
-    return res.status(500).send({
-      message: "Unable to validate username"
-    });
-  }
-};
-
-// Validate email
-const checkDuplicateEmail = async (req, res, next) => {
-  try {
-    // Check if email already exists
-    const existingUser = await User.findOne({
+    // Vérifier l'email
+    const userEmail = await User.findOne({
       where: {
         email: req.body.email
       }
     });
 
-    if (existingUser) {
+    if (userEmail) {
       return res.status(400).send({
-        message: "Failed! Email is already in use!"
+        message: "Erreur! Cet email est déjà utilisé!"
       });
     }
 
     next();
   } catch (error) {
     return res.status(500).send({
-      message: "Unable to validate email"
+      message: "Impossible de vérifier l'email",
+      error: error.message
     });
   }
 };
 
-// Validate password strength
-const validatePassword = (req, res, next) => {
-  const password = req.body.password;
+checkDuplicateUsername = async (req, res, next) => {
+  try {
+    // Vérifier le nom d'utilisateur
+    const username = await User.findOne({
+      where: {
+        username: req.body.username
+      }
+    });
 
-  // Password validation rules
-  // At least 8 characters long
-  // Contains at least one uppercase letter
-  // Contains at least one lowercase letter
-  // Contains at least one number
-  // Contains at least one special character
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (username) {
+      return res.status(400).send({
+        message: "Erreur! Ce nom d'utilisateur est déjà utilisé!"
+      });
+    }
 
-  if (!passwordRegex.test(password)) {
-    return res.status(400).send({
-      message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+    next();
+  } catch (error) {
+    return res.status(500).send({
+      message: "Impossible de vérifier le nom d'utilisateur",
+      error: error.message
     });
   }
+};
 
+// Valider le mot de passe (au moins 8 caractères)
+validatePassword = (req, res, next) => {
+  if (!req.body.password || req.body.password.length < 8) {
+    return res.status(400).send({
+      message: "Le mot de passe doit contenir au moins 8 caractères!"
+    });
+  }
+  
   next();
 };
 
-// Validate signup input
 const verifySignUp = {
-  checkDuplicateUsername,
   checkDuplicateEmail,
+  checkDuplicateUsername,
   validatePassword
 };
 

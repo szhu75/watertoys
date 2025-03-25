@@ -1,19 +1,19 @@
+// src/middlewares/authJwt.js
 const jwt = require('jsonwebtoken');
-const config = require('../config/auth.config.js');
+const config = require('../config/jwt');
 const db = require('../models');
 const User = db.user;
 
-// Vérification du token JWT
 verifyToken = (req, res, next) => {
-  let token = req.headers["x-access-token"] || req.headers["authorization"];
-  
+  let token = req.headers["authorization"];
+
   if (!token) {
     return res.status(403).send({
-      message: "No token provided!"
+      message: "Aucun token fourni!"
     });
   }
 
-  // Si le token commence par Bearer, supprimer le préfixe
+  // Supprimer le préfixe "Bearer " si présent
   if (token.startsWith('Bearer ')) {
     token = token.slice(7, token.length);
   }
@@ -21,55 +21,31 @@ verifyToken = (req, res, next) => {
   jwt.verify(token, config.secret, (err, decoded) => {
     if (err) {
       return res.status(401).send({
-        message: "Unauthorized!"
+        message: "Non autorisé! Token invalide ou expiré."
       });
     }
-    req.userId = decoded.id;
+    
+    // Stocker les informations décodées dans req.user
+    req.user = decoded;
     next();
   });
 };
 
-// Vérification si l'utilisateur est administrateur
 isAdmin = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    if (user.isAdmin) {
-      next();
-      return;
-    }
-    
-    res.status(403).send({
-      message: "Require Admin Role!"
-    });
+  // Vérifier si l'utilisateur est un admin selon les informations du token
+  if (req.user && (req.user.isAdmin === true || req.user.role === "admin")) {
+    next();
     return;
+  }
+
+  res.status(403).send({
+    message: "Accès réservé aux administrateurs!"
   });
 };
 
-// Vérification si l'utilisateur est le propriétaire ou un administrateur
-isOwnerOrAdmin = async (req, res, next) => {
-  try {
-    const user = await User.findByPk(req.userId);
-    const resourceId = parseInt(req.params.id);
-    
-    // Si l'utilisateur est admin ou est le propriétaire de la ressource
-    if (user.isAdmin || req.userId === resourceId) {
-      next();
-      return;
-    }
-    
-    res.status(403).send({
-      message: "Unauthorized access to this resource!"
-    });
-  } catch (error) {
-    res.status(500).send({
-      message: "Error checking user permissions"
-    });
-  }
-};
-
 const authJwt = {
-  verifyToken: verifyToken,
-  isAdmin: isAdmin,
-  isOwnerOrAdmin: isOwnerOrAdmin
+  verifyToken,
+  isAdmin
 };
 
 module.exports = authJwt;

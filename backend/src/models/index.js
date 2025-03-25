@@ -1,4 +1,4 @@
-const config = require('../config/db.config.js');
+const config = require('../config/DB');
 const Sequelize = require('sequelize');
 
 // Création de l'instance Sequelize
@@ -28,7 +28,7 @@ db.sequelize = sequelize;
 // Importation des modèles
 db.user = require('./user.model.js')(sequelize, Sequelize);
 db.product = require('./product.model.js')(sequelize, Sequelize);
-db.category = require('./category.model.js')(sequelize, Sequelize);
+db.category = require('./categorie.model.js')(sequelize, Sequelize);
 db.cart = require('./cart.model.js')(sequelize, Sequelize);
 db.cartItem = require('./cartItem.model.js')(sequelize, Sequelize);
 db.order = require('./order.model.js')(sequelize, Sequelize);

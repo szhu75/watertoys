@@ -1,0 +1,160 @@
+/* Style global pour le tableau de bord admin */
+.admin-dashboard {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    min-height: 100vh;
+  }
+  
+  .admin-header {
+    background-color: #172967;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .admin-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  .logout-btn {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .logout-btn:hover {
+    background-color: #ff3333;
+  }
+  
+  .dashboard-content {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px;
+    gap: 20px;
+  }
+  
+  /* Gestion des produits */
+  .products-management, 
+  .orders-management {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 20px;
+    width: 100%;
+  }
+  
+  .product-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .product-form input,
+  .product-form select,
+  .product-form textarea {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .submit-btn, 
+  .cancel-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit-btn {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .cancel-btn {
+    background-color: #f44336;
+    color: white;
+    margin-left: 10px;
+  }
+  
+  .submit-btn:hover {
+    background-color: #45a049;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Tableaux */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  table th, 
+  table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  /* Boutons d'action */
+  .edit-btn, 
+  .delete-btn {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .edit-btn {
+    background-color: #2196F3;
+    color: white;
+  }
+  
+  .delete-btn {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .edit-btn:hover {
+    background-color: #1976D2;
+  }
+  
+  .delete-btn:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .dashboard-content {
+      flex-direction: column;
+    }
+  
+    .form-row {
+      flex-direction: column;
+    }
+  }

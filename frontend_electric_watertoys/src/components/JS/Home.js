@@ -1,10 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../JS/Header';
 import Footer from '../JS/Footer';
 import '../CSS/Home.css';
 
-
 const Home = () => {
+  const navigate = useNavigate();
+
+  const handleNavigateToProducts = () => {
+    navigate('/product');
+  };
+
   return (
     <div className="home-container">
       <Header />
@@ -17,7 +23,12 @@ const Home = () => {
           <div className="video-overlay">
             <div className="header-content">
               <h1>THE BEST WATER TOYS</h1>
-              <button className="info-button">BUY IT NOW</button>
+              <button 
+                className="info-button"
+                onClick={handleNavigateToProducts}
+              >
+                BUY IT NOW
+              </button>
             </div>
           </div>
         </section>
@@ -28,7 +39,7 @@ const Home = () => {
           <h3>Take Your Water Toys to Every Destination</h3>
 
           <div className="intro-text">
-          <p> Dive into a <span className="highlight">world of fun and excitement</span> with our extensive range of water toys. Whether you're a thrill-seeker or someone who enjoys a leisurely day by the water, our water toys are designed to <span className="highlight">provide endless hours of entertainment and adventure for everyone.</span> </p>
+            <p>Dive into a <span className="highlight">world of fun and excitement</span> with our extensive range of water toys. Whether you're a thrill-seeker or someone who enjoys a leisurely day by the water, our water toys are designed to <span className="highlight">provide endless hours of entertainment and adventure for everyone.</span></p>
             <p>
               From <span className="highlight">high-speed</span> water scooters to tranquil paddleboards, our selection caters to all preferences and skill levels. Enjoy the <span className="highlight">versatility</span> of our toys, which are perfect for the sea, lakes, and even your backyard pool. <br />Suitable for kids and adults alike, water toys bring families together for <span className="highlight">unforgettable experiences</span>.
             </p>
@@ -69,17 +80,21 @@ const Home = () => {
               <h3>TIWAL</h3>
             </div>
           </div>
-          <div className="see-more">
-            <a href="/product">
-              <span>See More</span>
+          <div className="see-more">             
+            <span>See More</span>
+            <button 
+              className="see-more-btn"
+              onClick={handleNavigateToProducts}
+            >
+ 
               <img src="images/see_more_2.PNG" alt="See More Arrow" className="arrow" />
-            </a>
+            </button>
           </div>
         </section>
 
         <section className="Titre-section">
-        <h2>In search of an unforgettable, playful summer ?</h2>
-        <h3>EXPLORE THE WORLD OF WATER TOYS</h3>
+          <h2>In search of an unforgettable, playful summer ?</h2>
+          <h3>EXPLORE THE WORLD OF WATER TOYS</h3>
         </section>
 
         <section className="water-toys-section">
@@ -103,36 +118,10 @@ const Home = () => {
             <div className="text">
               <h3>Perfect for Any Occasion</h3>
               <p>Whether you're planning a beach vacation, a pool party, or a weekend getaway, our water toys are the perfect companions. They are easy to transport, set up, and use, making them ideal for spontaneous adventures and planned outings alike.</p>
-              <p> With our water toys, the possibilities are endless. Explore the underwater world, race across the waves, or simply relax and soak up the sun. Create memories that will last a lifetime with our exciting and diverse range of water toys.</p>
+              <p>With our water toys, the possibilities are endless. Explore the underwater world, race across the waves, or simply relax and soak up the sun. Create memories that will last a lifetime with our exciting and diverse range of water toys.</p>
             </div>
           </div>
         </section>
-
-    
-        {/* <section className="product-benefits">
-          <h2>Why Choose Our Water Toys?</h2>
-          <div className="benefit">
-            <img src="images/benefit1.jpg" alt="Benefit 1" />
-            <div className="benefit-info">
-              <h3>High Performance</h3>
-              <p>Our water toys are designed for speed and maneuverability, giving you the best experience on the water.</p>
-            </div>
-          </div>
-          <div className="benefit">
-            <img src="images/benefit2.jpg" alt="Benefit 2" />
-            <div className="benefit-info">
-              <h3>Eco-Friendly</h3>
-              <p>We prioritize sustainability with electric-powered toys that reduce your carbon footprint.</p>
-            </div>
-          </div>
-          <div className="benefit">
-            <img src="images/benefit3.jpg" alt="Benefit 3" />
-            <div className="benefit-info">
-              <h3>Durability</h3>
-              <p>Built to last, our toys withstand the toughest conditions, ensuring long-term use and reliability.</p>
-            </div>
-          </div>
-        </section> */}
 
         <section className="testimonials">
           <h2>Customer Testimonials</h2>

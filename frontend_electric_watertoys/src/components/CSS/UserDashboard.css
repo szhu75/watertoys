@@ -1,0 +1,459 @@
+/* src/CSS/UserDashboard.css */
+.user-dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-container {
+  display: flex;
+  flex: 1;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #172967;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 10px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 12px 0;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.sidebar li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding-left: 10px;
+}
+
+.sidebar li.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-left: 4px solid #4ac3f3;
+  padding-left: 10px;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.content h2 {
+  color: #172967;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* Profile Tab */
+.profile-info {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.profile-info p {
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.edit-profile-btn {
+  background-color: #172967;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.edit-profile-btn:hover {
+  background-color: #0b1a4d;
+}
+
+/* Cart Tab */
+.cart-items table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.cart-items th, .cart-items td {
+  border: 1px solid #e0e0e0;
+  padding: 12px;
+  text-align: center;
+}
+
+.cart-items th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+/* Contrôles de Quantité */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #f4f4f4;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 0 auto;
+  width: max-content;
+}
+
+.quantity-control .quantity-btn {
+  background-color: #172967;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.quantity-control .quantity-btn:hover {
+  background-color: #4ac3f3;
+}
+
+.quantity-control span {
+  font-weight: bold;
+  min-width: 30px;
+  text-align: center;
+}
+
+.remove-btn {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.remove-btn:hover {
+  background-color: #ff1a1a;
+}
+
+.cart-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.total {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #172967;
+}
+
+.checkout-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.checkout-btn:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+/* Orders Tab */
+.orders-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-list th, .orders-list td {
+  border: 1px solid #e0e0e0;
+  padding: 12px;
+  text-align: center;
+}
+
+.orders-list th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.details-btn {
+  background-color: #172967;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.details-btn:hover {
+  background-color: #4ac3f3;
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-container {
+      flex-direction: column;
+  }
+  
+  .sidebar {
+      width: 100%;
+      margin-bottom: 20px;
+  }
+  
+  .content {
+      margin-left: 0;
+  }
+
+  .cart-items table {
+      font-size: 0.9rem;
+  }
+
+  .quantity-control {
+      flex-direction: column;
+  }
+}
+
+/* Animations et effets */
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translateY(-10px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+.cart-items table,
+.orders-list table {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Ajoutez ces styles à votre UserDashboard.css pour les nouvelles fonctionnalités */
+
+/* Loading spinner */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  height: 50px;
+}
+
+.loading-spinner::after {
+  content: "";
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #172967;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Message d'erreur */
+.error-message {
+  background-color: #ffebee;
+  color: #b71c1c;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border-left: 4px solid #f44336;
+}
+
+/* Bouton de rafraîchissement des commandes */
+.refresh-orders-btn {
+  background-color: transparent;
+  color: #172967;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: 15px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.refresh-orders-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.refresh-orders-btn:disabled {
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Style pour les badges de statut */
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-processing {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.status-shipped {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-delivered {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Section sans commandes */
+.no-orders {
+  text-align: center;
+  padding: 30px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.shop-now-btn {
+  background-color: #172967;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.shop-now-btn:hover {
+  background-color: #0b1a4d;
+  transform: translateY(-2px);
+}
+
+/* Styles supplémentaires pour UserDashboard.css */
+
+/* Bouton pour vider le panier */
+.empty-cart-btn {
+  background-color: transparent;
+  color: #ff4d4d;
+  border: 1px solid #ff4d4d;
+  padding: 5px 10px;
+  border-radius: 4px;
+  margin-left: 15px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.empty-cart-btn:hover {
+  background-color: #fff0f0;
+}
+
+.empty-cart-btn:disabled {
+  color: #cccccc;
+  border-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Message de panier vide */
+.empty-cart-message {
+  text-align: center;
+  padding: 30px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+/* Styles pour les boutons dans la section commandes */
+.order-actions {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.delete-order-btn {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 0.85rem;
+}
+
+.delete-order-btn:hover {
+  background-color: #e60000;
+}
+
+/* Animation pour suppression */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+.deleting {
+  animation: fadeOut 0.3s forwards;
+}
