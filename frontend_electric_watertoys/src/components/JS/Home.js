@@ -46,11 +46,11 @@ const Home = () => {
           </div>
         </section>
 
-        <section className="image-banner"> 
-          <div className="image-overlay">
-            <div className="image-banner-content">              
-              <h3>Versatility and Fun for All Ages</h3>
-              <h2>EXPLORE THE SEAFLOOR IN A NEW WAY</h2>
+        <section className="image-banner-home"> 
+          <div className="image-overlay-home">
+            <div className="image-banner-content-home">              
+              <p className='titre-image-home'>Versatility and Fun for All Ages</p>
+              <p className='titre-image-home-2'>EXPLORE THE SEAFLOOR IN A NEW WAY</p>
             </div>
           </div>
         </section>

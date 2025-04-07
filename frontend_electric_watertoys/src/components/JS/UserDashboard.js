@@ -455,12 +455,7 @@ const UserDashboard = () => {
                 <p><strong>Nom:</strong> {user.lastName}</p>
                 <p><strong>Prénom:</strong> {user.firstName}</p>
                 <p><strong>Email:</strong> {user.email}</p>
-                <button 
-                  className="edit-profile-btn"
-                  onClick={() => navigate('/edit-profile')}
-                >
-                  Modifier mon profil
-                </button>
+  
               </div>
             </div>
           )}

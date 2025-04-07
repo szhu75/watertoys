@@ -155,6 +155,19 @@
   text-align: center;
   margin-bottom: 15px;
   border-left: 4px solid #4caf50;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
 }
 
 /* Message d'erreur */
@@ -175,6 +188,7 @@
   color: #757575;
   background-color: #f5f5f5;
   border-radius: 5px;
+  font-style: italic;
 }
 
 /* Gestion des produits */
@@ -195,9 +209,11 @@
   flex-direction: column;
   gap: 15px;
   margin-bottom: 20px;
+  margin-right: 20px;
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .form-row {
@@ -212,11 +228,22 @@
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.product-form input:focus,
+.product-form select:focus,
+.product-form textarea:focus {
+  border-color: #172967;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(23, 41, 103, 0.1);
 }
 
 .form-actions {
   display: flex;
   gap: 10px;
+  margin-top: 10px;
 }
 
 .submit-btn, 
@@ -225,7 +252,8 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  font-weight: bold;
 }
 
 .submit-btn {
@@ -240,16 +268,22 @@
 
 .submit-btn:hover {
   background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .cancel-btn:hover {
   background-color: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .submit-btn:disabled,
 .cancel-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Tableaux */
@@ -257,6 +291,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.05);
 }
 
 table th, 
@@ -269,27 +304,50 @@ table td {
 table th {
   background-color: #f2f2f2;
   font-weight: bold;
+  color: #172967;
+}
+
+table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+table tr:hover {
+  background-color: #f5f5f5;
 }
 
 /* Boutons d'action */
 .edit-btn, 
-.delete-btn {
+.delete-btn,
+.trash-btn,
+.restore-btn,
+.permanent-delete-btn {
   padding: 5px 10px;
   margin-right: 5px;
   border: none;
   border-radius: 3px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
 }
 
 .edit-btn {
   background-color: #2196F3;
   color: white;
+  margin-left: 5px;
 }
 
 .delete-btn {
   background-color: #f44336;
   color: white;
+}
+
+.edit-btn:hover,
+.trash-btn:hover,
+.restore-btn:hover,
+.permanent-delete-btn:hover,
+.delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .edit-btn:hover {
@@ -301,9 +359,14 @@ table th {
 }
 
 .edit-btn:disabled,
-.delete-btn:disabled {
+.delete-btn:disabled,
+.trash-btn:disabled,
+.restore-btn:disabled,
+.permanent-delete-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Badges de statut */
@@ -386,6 +449,7 @@ table th {
   padding: 20px;
   border-radius: 8px;
   line-height: 1.6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .profile-info p {
@@ -399,12 +463,15 @@ table th {
   padding: 10px 15px;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   margin-top: 15px;
+  font-weight: bold;
 }
 
 .edit-profile-btn:hover {
   background-color: #1976D2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 /* Responsive */
@@ -487,4 +554,220 @@ h3 {
   color: #333;
   margin-top: 20px;
   margin-bottom: 10px;
+}
+
+/* Styles pour la fonctionnalité de corbeille */
+
+/* Bouton de basculement de la corbeille */
+.trash-toggle-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  padding: 8px 14px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #555;
+  font-weight: 500;
+  margin-right: 20px;
+}
+
+.trash-toggle-btn.active {
+  background-color: #e0e0e0;
+  font-weight: bold;
+  color: #172967;
+}
+
+.trash-toggle-btn:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* En-tête de la section produits avec bouton de corbeille */
+.products-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Notification pour annuler la suppression */
+.undo-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 320px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+  animation: slideUp 0.4s ease-out;
+}
+
+.undo-notification span {
+  margin-right: 15px;
+  font-weight: 500;
+}
+
+.undo-notification button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.undo-notification button:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+/* Section de la corbeille */
+.trash-section {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.trash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.empty-trash-btn {
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.empty-trash-btn:hover {
+  background-color: #ff3333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Table de la corbeille */
+.trash-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: white;
+}
+
+.trash-table th {
+  background-color: #f0f0f0;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+  color: #555;
+}
+
+.trash-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.trash-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Boutons pour les produits */
+.trash-btn {
+  background-color: #ffa726;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  margin-left: 5px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.trash-btn:hover {
+  background-color: #ff9800;
+}
+
+.restore-btn {
+  background-color: #42a5f5;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.restore-btn:hover {
+  background-color: #2196f3;
+}
+
+.permanent-delete-btn {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  margin-left: 5px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.permanent-delete-btn:hover {
+  background-color: #e53935;
+}
+
+/* Affichage de l'image actuelle dans le formulaire d'édition */
+.current-image {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 8px;
+}
+
+.current-image span {
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.current-image img {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 3px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+
+.current-image img:hover {
+  transform: scale(1.05);
 }

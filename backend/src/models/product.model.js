@@ -9,8 +9,8 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
       validate: {
-        notEmpty: { 
-          msg: "Le nom du produit est requis" 
+        notEmpty: {
+          msg: "Le nom du produit est requis"
         },
         len: {
           args: [2, 255],
@@ -32,7 +32,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: false,
       validate: {
-        min: { 
+        min: {
           args: [0],
           msg: "Le prix doit être positif"
         },
@@ -46,7 +46,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
       defaultValue: 0,
       validate: {
-        min: { 
+        min: {
           args: [0],
           msg: "Le stock ne peut pas être négatif"
         },
@@ -59,9 +59,9 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: true,
       validate: {
-        isUrl: { 
+        isUrl: {
           args: true,
-          msg: "L'URL de l'image n'est pas valide" 
+          msg: "L'URL de l'image n'est pas valide"
         }
       }
     },
@@ -72,6 +72,16 @@ module.exports = (sequelize, Sequelize) => {
         model: 'categories',
         key: 'id'
       }
+    },
+    // Nouveaux champs pour la corbeille
+    deleted: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    deletedAt: {
+      type: Sequelize.DATE,
+      allowNull: true
     },
     createdAt: {
       type: Sequelize.DATE,
@@ -88,13 +98,12 @@ module.exports = (sequelize, Sequelize) => {
         // Convertir le prix et le stock en nombres
         if (product.price) product.price = parseFloat(product.price);
         if (product.stock) product.stock = parseInt(product.stock);
-        
+       
         // Trim des champs de texte
         if (product.name) product.name = product.name.trim();
         if (product.description) product.description = product.description.trim();
       }
     }
   });
-
   return Product;
 };

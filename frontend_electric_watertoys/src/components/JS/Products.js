@@ -71,7 +71,11 @@ const Products = () => {
   const recupererProduits = useCallback(async () => {
     try {
       setChargement(true);
-      const reponse = await axios.get('http://localhost:5000/api/products');
+      const token = localStorage.getItem('token');
+      
+      const reponse = await axios.get('http://localhost:5000/api/products', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
       
       // Assurer que les données sont un tableau
       const donneesProduits = Array.isArray(reponse.data) 

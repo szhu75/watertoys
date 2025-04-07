@@ -9,7 +9,7 @@ const fs = require('fs');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Assurez-vous que ce chemin correspond à votre structure de projet
-    const uploadDir = path.join(__dirname, '../../frontend/public/images/products');
+    const uploadDir = path.join(__dirname, '../../frontend_electric_watertoys/public/images');
     
     // Créer le dossier s'il n'existe pas
     if (!fs.existsSync(uploadDir)){
@@ -36,10 +36,11 @@ const upload = multer({
   }
 });
 
-// Récupérer tous les produits
+// Récupérer tous les produits actifs (non supprimés)
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.findAll({
+      where: { deleted: false },
       include: [{ 
         model: Category, 
         as: 'category',
@@ -52,6 +53,28 @@ exports.getAllProducts = async (req, res) => {
     console.error('Erreur lors de la récupération des produits:', error);
     res.status(500).json({ 
       message: "Erreur lors de la récupération des produits",
+      error: error.message 
+    });
+  }
+};
+
+// Récupérer tous les produits dans la corbeille
+exports.getTrashedProducts = async (req, res) => {
+  try {
+    const products = await Product.findAll({
+      where: { deleted: true },
+      include: [{ 
+        model: Category, 
+        as: 'category',
+        attributes: ['id', 'name']
+      }],
+      order: [['deletedAt', 'DESC']]
+    });
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des produits supprimés:', error);
+    res.status(500).json({ 
+      message: "Erreur lors de la récupération des produits supprimés",
       error: error.message 
     });
   }
@@ -78,7 +101,8 @@ exports.createProduct = async (req, res) => {
         description, 
         price: parseFloat(price),
         stock: parseInt(stock),
-        categoryId: parseInt(categoryId)
+        categoryId: parseInt(categoryId),
+        deleted: false // Par défaut, le produit n'est pas supprimé
       };
 
       // Ajouter le chemin de l'image si un fichier a été uploadé
@@ -139,7 +163,7 @@ exports.updateProduct = async (req, res) => {
       if (req.file) {
         // Supprimer l'ancienne image si elle existe
         if (product.imageUrl) {
-          const oldImagePath = path.join(__dirname, '../../frontend/public', product.imageUrl);
+          const oldImagePath = path.join(__dirname, '../../frontend_electric_watertoys/public/images', product.imageUrl);
           if (fs.existsSync(oldImagePath)) {
             try {
               fs.unlinkSync(oldImagePath);
@@ -183,7 +207,65 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// Supprimer un produit
+// Mettre un produit à la corbeille (soft delete)
+exports.trashProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findByPk(id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Produit non trouvé" });
+    }
+
+    // Marquer comme supprimé avec horodatage
+    await product.update({
+      deleted: true,
+      deletedAt: new Date()
+    });
+
+    res.status(200).json({ 
+      message: "Produit mis à la corbeille avec succès",
+      product
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à la corbeille du produit:', error);
+    res.status(500).json({ 
+      message: "Erreur lors de la mise à la corbeille du produit", 
+      error: error.message 
+    });
+  }
+};
+
+// Restaurer un produit depuis la corbeille
+exports.restoreProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findByPk(id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Produit non trouvé" });
+    }
+
+    // Restaurer le produit
+    await product.update({
+      deleted: false,
+      deletedAt: null
+    });
+
+    res.status(200).json({ 
+      message: "Produit restauré avec succès",
+      product
+    });
+  } catch (error) {
+    console.error('Erreur lors de la restauration du produit:', error);
+    res.status(500).json({ 
+      message: "Erreur lors de la restauration du produit", 
+      error: error.message 
+    });
+  }
+};
+
+// Supprimer définitivement un produit
 exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -195,7 +277,7 @@ exports.deleteProduct = async (req, res) => {
 
     // Supprimer l'image associée si elle existe
     if (product.imageUrl) {
-      const imagePath = path.join(__dirname, '../../frontend/public', product.imageUrl);
+      const imagePath = path.join(__dirname, '../../frontend_electric_watertoys/public/images', product.imageUrl);
       if (fs.existsSync(imagePath)) {
         try {
           fs.unlinkSync(imagePath);
@@ -206,11 +288,51 @@ exports.deleteProduct = async (req, res) => {
     }
 
     await product.destroy();
-    res.status(200).json({ message: "Produit supprimé avec succès" });
+    res.status(200).json({ message: "Produit supprimé définitivement avec succès" });
   } catch (error) {
     console.error('Erreur lors de la suppression du produit:', error);
     res.status(500).json({ 
       message: "Erreur lors de la suppression du produit", 
+      error: error.message 
+    });
+  }
+};
+
+// Vider la corbeille (supprimer définitivement tous les produits dans la corbeille)
+exports.emptyTrash = async (req, res) => {
+  try {
+    // Récupérer tous les produits supprimés pour effacer leurs images
+    const trashedProducts = await Product.findAll({
+      where: { deleted: true }
+    });
+
+    // Supprimer les images des produits
+    for (const product of trashedProducts) {
+      if (product.imageUrl) {
+        const imagePath = path.join(__dirname, '../../frontend_electric_watertoys/public/images', product.imageUrl);
+        if (fs.existsSync(imagePath)) {
+          try {
+            fs.unlinkSync(imagePath);
+          } catch (unlinkError) {
+            console.warn(`Impossible de supprimer l'image du produit ${product.id}:`, unlinkError);
+          }
+        }
+      }
+    }
+
+    // Supprimer tous les produits de la corbeille
+    const result = await Product.destroy({
+      where: { deleted: true }
+    });
+
+    res.status(200).json({ 
+      message: "Corbeille vidée avec succès", 
+      deletedCount: result 
+    });
+  } catch (error) {
+    console.error('Erreur lors du vidage de la corbeille:', error);
+    res.status(500).json({ 
+      message: "Erreur lors du vidage de la corbeille", 
       error: error.message 
     });
   }

@@ -113,55 +113,57 @@ body, html {
   .highlight { font-weight: bold; /* Apply bold styling to highlighted text */
   }
   
-  .image-banner {
-    position: relative;
-    width: 100%;
-    height: 60vh; /* Ajustez la hauteur selon vos besoins */
-    background-image: url('https://foilelectrique.fr/wp-content/uploads/2024/12/pratique_scooter_sous_marin.jpg'); /* Utilisez le chemin absolu depuis le dossier public */
-    background-size: cover;
-    background-attachment: fixed; /* Effet de parallax */
-    background-position: center;
-    display: flex;
-    align-items: flex-end; /* Aligner le contenu en bas */
-    justify-content: flex-start; /* Aligner le contenu à gauche */
-    color: white; /* Assurez-vous que le texte est blanc */
-    text-align: left; /* Aligner le texte à gauche */
+  .image-banner-home {
+  position: relative;
+  width: 100%;
+  height: 60vh; /* Ajustez la hauteur selon vos besoins */
+  background-image: url('https://foilelectrique.fr/wp-content/uploads/2024/12/pratique_scooter_sous_marin.jpg'); /* Utilisez le chemin absolu depuis le dossier public */
+  background-size: cover;
+  background-attachment: fixed; /* Effet de parallax */
+  background-position: center;
+  display: flex;
+  align-items: flex-end; /* Aligner le contenu en bas */
+  justify-content: flex-start; /* Aligner le contenu à gauche */
+  color: white; /* Assurez-vous que le texte est blanc */
+  text-align: left; /* Aligner le texte à gauche */
+}
+
+.image-banner-home .image-overlay-home {
+  position: absolute;
+  top: 230px;
+  left: 150px;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.image-banner-home .image-banner-content-home {
+  position: relative;
+  z-index: 2;
+  padding: 2rem;
+}
+
+/* Styles pour le h3 en utilisant la classe titre-image-home */
+.titre-image-home {
+  font-size: 25px; /* Ajustez la taille de la police selon vos besoins */
+  margin-bottom: 15px; /* Supprimez la marge par défaut */
+  font-weight: normal; /* Texte régulier */
+}
+
+/* Styles pour le h2 en utilisant la classe titre-image-home-2 */
+.titre-image-home-2 {
+  font-size: 35px; /* Ajustez la taille de la police selon vos besoins */
+  margin: 0; /* Supprimez la marge par défaut */
+  font-weight: bold; /* Mettre le texte en gras */
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+@media screen and (max-width: 768px) {
+  .image-banner-home {
+    height: auto;
   }
-  
-  .image-banner h2 {
-    font-size: 35px; /* Ajustez la taille de la police selon vos besoins */
-    margin: 0; /* Supprimez la marge par défaut */
-    font-weight: bold; /* Mettre le texte en gras */
-    font-family:'Segoe UI', Tahoma, sans-serif;
-  }
-  
-  .image-banner h3 {
-    font-size: 25px; /* Ajustez la taille de la police selon vos besoins */
-    margin-bottom: 15px; /* Supprimez la marge par défaut */
-    font-weight: normal; /* Texte régulier */
-  
-  }
-  
-  .image-banner .image-overlay {
-    position: absolute;
-    top: 230px;
-    left: 150px;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-  }
-  
-  .image-banner .image-banner-content {
-    position: relative;
-    z-index: 2;
-    padding: 2rem;
-  }
-  
-  @media screen and (max-width: 768px) {
-    .image-banner {
-      height: auto;
-    }
-  }
+}
+
   
   .info-section {
     display: flex;
