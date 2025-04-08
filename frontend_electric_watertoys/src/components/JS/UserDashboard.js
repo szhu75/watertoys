@@ -320,70 +320,7 @@ const UserDashboard = () => {
     localStorage.removeItem('token');
     navigate('/');
   }, [navigate]);
-  
-  // Supprimer le compte de l'utilisateur
-  const deleteAccount = useCallback(async () => {
-    // Demander confirmation avec un message explicite
-    const confirmDelete = window.confirm(
-      "ATTENTION : Êtes-vous sûr de vouloir supprimer définitivement votre compte ?\n\n" +
-      "Cette action est irréversible et entraînera :\n" +
-      "- La suppression de toutes vos informations personnelles\n" +
-      "- La suppression de votre historique de commandes\n" +
-      "- La déconnexion immédiate\n\n" +
-      "Voulez-vous continuer ?"
-    );
 
-    if (!confirmDelete) {
-      return; // Annuler si l'utilisateur ne confirme pas
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const token = localStorage.getItem('token');
-      
-      // Requête pour supprimer le compte
-      await axios.delete('http://localhost:5000/api/users/account', {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      // Nettoyer le stockage local
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      localStorage.removeItem('clientOrders');
-      
-      // Rediriger vers la page d'accueil
-      navigate('/', { 
-        state: { 
-          message: 'Votre compte a été supprimé avec succès.' 
-        } 
-      });
-      
-      alert('Votre compte a été supprimé avec succès.');
-    } catch (error) {
-      console.error('Erreur lors de la suppression du compte:', error);
-      
-      let errorMessage = 'Impossible de supprimer votre compte. Veuillez réessayer.';
-      if (error.response) {
-        if (error.response.status === 401) {
-          errorMessage = 'Votre session a expiré. Veuillez vous reconnecter.';
-          navigate('/login');
-        } else if (error.response.data && error.response.data.message) {
-          errorMessage = error.response.data.message;
-        }
-      }
-      
-      setError(errorMessage);
-      alert(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [navigate]);
-  
   // Supprimer une commande réelle de l'API
     // Ajouter cette fonction dans UserDashboard.js
 const deleteRealOrder = useCallback(async (orderId) => {
@@ -563,17 +500,7 @@ const deleteRealOrder = useCallback(async (orderId) => {
                 <p><strong>Nom:</strong> {user.lastName}</p>
                 <p><strong>Prénom:</strong> {user.firstName}</p>
                 <p><strong>Email:</strong> {user.email}</p>
-                
-                {/* Bouton de suppression de compte */}
-                <div className="account-actions">
-                  <button 
-                    className="delete-account-btn"
-                    onClick={deleteAccount}
-                    disabled={loading}
-                  >
-                    Supprimer mon compte
-                  </button>
-                </div>
+            
               </div>
             </div>
           )}
