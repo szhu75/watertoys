@@ -1,6 +1,7 @@
 // src/components/JS/ConfirmationPage.js
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios'; // Ajoutez cet import
 import Header from './Header';
 import Footer from './Footer';
 import '../CSS/ConfirmationPage.css';
@@ -9,7 +10,6 @@ const ConfirmationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isProcessing, setIsProcessing] = useState(true);
-  // eslint-disable-next-line no-unused-vars
   const [orderCreated, setOrderCreated] = useState(false);
   const [error, setError] = useState(null);
   
@@ -41,7 +41,48 @@ const ConfirmationPage = () => {
       return;
     }
     
-    // Simuler une commande côté client
+    // Créer une vraie commande dans la base de données
+    const createRealOrder = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setError("Vous devez être connecté pour créer une commande");
+          setIsProcessing(false);
+          return;
+        }
+        
+        const response = await axios.post(
+          'http://localhost:5000/api/orders',
+          {
+            paymentMethod: paymentMethod
+          },
+          {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        
+        console.log("Commande créée avec succès:", response.data);
+        localStorage.setItem('cartCleared', 'true');
+        localStorage.setItem('newOrderId', response.data.order.id);
+        localStorage.setItem('orderJustCreated', 'true');
+        setOrderCreated(true);
+      } catch (error) {
+        console.error("Erreur lors de la création de la commande:", error);
+        setError("Erreur lors de la création de la commande. " + 
+                (error.response?.data?.message || error.message));
+        
+        // Si la commande échoue côté serveur, créer une commande simulée comme solution de secours
+        simulateOrder();
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+    
+    // Simuler une commande côté client (solution de secours)
     const simulateOrder = () => {
       try {
         // Obtenir les commandes existantes du localStorage ou initialiser un tableau vide
@@ -84,12 +125,12 @@ const ConfirmationPage = () => {
       }
     };
     
-    // Simuler un délai de traitement
+    // Simuler un délai de traitement puis créer la commande
     setTimeout(() => {
-      simulateOrder();
+      createRealOrder();
     }, 1500);
     
-  }, [location.state, navigate, orderDetails, orderNumber]);
+  }, [location.state, navigate, orderDetails, orderNumber, paymentMethod]);
   
   const formatDate = (date) => {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };

@@ -103,8 +103,6 @@ const UserDashboard = () => {
       }
       
       // Déduplication des commandes
-      // On utilise l'ID comme clé unique, donc si une commande avec le même ID existe dans les deux sources,
-      // on garde uniquement celle du client (localStorage)
       const orderMap = new Map();
       
       // Ajouter d'abord les commandes API
@@ -323,6 +321,145 @@ const UserDashboard = () => {
     navigate('/');
   }, [navigate]);
   
+  // Supprimer le compte de l'utilisateur
+  const deleteAccount = useCallback(async () => {
+    // Demander confirmation avec un message explicite
+    const confirmDelete = window.confirm(
+      "ATTENTION : Êtes-vous sûr de vouloir supprimer définitivement votre compte ?\n\n" +
+      "Cette action est irréversible et entraînera :\n" +
+      "- La suppression de toutes vos informations personnelles\n" +
+      "- La suppression de votre historique de commandes\n" +
+      "- La déconnexion immédiate\n\n" +
+      "Voulez-vous continuer ?"
+    );
+
+    if (!confirmDelete) {
+      return; // Annuler si l'utilisateur ne confirme pas
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const token = localStorage.getItem('token');
+      
+      // Requête pour supprimer le compte
+      await axios.delete('http://localhost:5000/api/users/account', {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Nettoyer le stockage local
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('clientOrders');
+      
+      // Rediriger vers la page d'accueil
+      navigate('/', { 
+        state: { 
+          message: 'Votre compte a été supprimé avec succès.' 
+        } 
+      });
+      
+      alert('Votre compte a été supprimé avec succès.');
+    } catch (error) {
+      console.error('Erreur lors de la suppression du compte:', error);
+      
+      let errorMessage = 'Impossible de supprimer votre compte. Veuillez réessayer.';
+      if (error.response) {
+        if (error.response.status === 401) {
+          errorMessage = 'Votre session a expiré. Veuillez vous reconnecter.';
+          navigate('/login');
+        } else if (error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+      }
+      
+      setError(errorMessage);
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
+  
+  // Supprimer une commande réelle de l'API
+    // Ajouter cette fonction dans UserDashboard.js
+const deleteRealOrder = useCallback(async (orderId) => {
+  if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.")) {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      
+      // Appeler l'API pour supprimer la commande
+      await axios.delete(
+        `http://localhost:5000/api/orders/${orderId}`,
+        {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      // Rafraîchir la liste des commandes
+      fetchOrders();
+        
+        // Notification
+        alert('Commande supprimée avec succès!');
+      } catch (error) {
+        console.error('Erreur lors de la suppression de la commande:', error);
+        
+        let errorMessage = 'Erreur lors de la suppression de la commande.';
+        if (error.response) {
+          if (error.response.status === 404) {
+            errorMessage = 'Cette commande n\'existe pas ou ne peut plus être supprimée.';
+          } else if (error.response.status === 403) {
+            errorMessage = 'Vous n\'êtes pas autorisé à supprimer cette commande.';
+          } else if (error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+          }
+        }
+        
+        setError(errorMessage);
+        alert(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [fetchOrders]);
+  
+  // Fonction pour voir les détails d'une commande
+  const viewOrderDetails = useCallback((orderId) => {
+    // Pour une commande simulée, afficher les détails directement
+    const clientOrdersStr = localStorage.getItem('clientOrders');
+    if (clientOrdersStr) {
+      try {
+        const clientOrders = JSON.parse(clientOrdersStr);
+        const order = clientOrders.find(o => o.id.toString() === orderId.toString());
+        
+        if (order) {
+          // Afficher les détails sous forme d'alerte (simple pour l'exemple)
+          alert(`Commande #${order.id}\nDate: ${new Date(order.orderDate).toLocaleDateString()}\nMontant: ${order.totalAmount.toFixed(2)}€\nStatut: ${order.status}\n\nProduits commandés:\n${order.items.map(item => `${item.productName} x${item.quantity} (${item.unitPrice}€)`).join('\n')}`);
+          return;
+        }
+      } catch (e) {
+        console.error('Erreur lors du parsing des commandes locales:', e);
+      }
+    }
+    
+    // Sinon, naviguer vers la page de détails (pour les commandes de l'API)
+    navigate(`/order/${orderId}`);
+  }, [navigate]);
+  
+  // Fonction pour rafraîchir manuellement les commandes
+  const refreshOrders = () => {
+    console.log("Rafraîchissement manuel des commandes");
+    fetchOrders();
+  };
+
   // Récupérer les informations de l'utilisateur au chargement
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('user'));
@@ -384,36 +521,7 @@ const UserDashboard = () => {
       }
     }
   }, [navigate, location, fetchOrders, fetchCart]);
-  
-  // Fonction pour rafraîchir manuellement les commandes
-  const refreshOrders = () => {
-    console.log("Rafraîchissement manuel des commandes");
-    fetchOrders();
-  };
-  
-  // Fonction pour voir les détails d'une commande
-  const viewOrderDetails = useCallback((orderId) => {
-    // Pour une commande simulée, afficher les détails directement
-    const clientOrdersStr = localStorage.getItem('clientOrders');
-    if (clientOrdersStr) {
-      try {
-        const clientOrders = JSON.parse(clientOrdersStr);
-        const order = clientOrders.find(o => o.id.toString() === orderId.toString());
-        
-        if (order) {
-          // Afficher les détails sous forme d'alerte (simple pour l'exemple)
-          alert(`Commande #${order.id}\nDate: ${new Date(order.orderDate).toLocaleDateString()}\nMontant: ${order.totalAmount.toFixed(2)}€\nStatut: ${order.status}\n\nProduits commandés:\n${order.items.map(item => `${item.productName} x${item.quantity} (${item.unitPrice}€)`).join('\n')}`);
-          return;
-        }
-      } catch (e) {
-        console.error('Erreur lors du parsing des commandes locales:', e);
-      }
-    }
-    
-    // Sinon, naviguer vers la page de détails (pour les commandes de l'API)
-    navigate(`/order/${orderId}`);
-  }, [navigate]);
-  
+
   return (
     <div className="user-dashboard">
       <Header cart={cart} />
@@ -455,7 +563,17 @@ const UserDashboard = () => {
                 <p><strong>Nom:</strong> {user.lastName}</p>
                 <p><strong>Prénom:</strong> {user.firstName}</p>
                 <p><strong>Email:</strong> {user.email}</p>
-  
+                
+                {/* Bouton de suppression de compte */}
+                <div className="account-actions">
+                  <button 
+                    className="delete-account-btn"
+                    onClick={deleteAccount}
+                    disabled={loading}
+                  >
+                    Supprimer mon compte
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -607,14 +725,24 @@ const UserDashboard = () => {
                             >
                               Détails
                             </button>
-                            {order.isClientOrder && (
-                              <button 
-                                className="delete-order-btn"
-                                onClick={() => deleteOrder(order.id)}
-                              >
-                                Supprimer
-                              </button>
-                            )}
+                            
+                            <button 
+                              className="delete-order-btn"
+                              onClick={() => {
+                                // Utiliser différentes fonctions selon le type de commande
+                                if (order.isClientOrder) {
+                                  deleteOrder(order.id);
+                                } else {
+                                  deleteRealOrder(order.id);
+                                }
+                              }}
+                              disabled={loading || (order.status && order.status !== 'pending')}
+                              title={order.status && order.status !== 'pending' ? 
+                                "Seules les commandes en attente peuvent être supprimées" : 
+                                "Supprimer la commande"}
+                            >
+                              Supprimer
+                            </button>
                           </td>
                         </tr>
                       ))}

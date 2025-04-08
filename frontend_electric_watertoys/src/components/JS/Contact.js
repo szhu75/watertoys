@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import Head from '../JS/Header'; 
-import Footer from '../JS/Footer';  
+import emailjs from '@emailjs/browser';
+import Head from '../JS/Header';
+import Footer from '../JS/Footer';
 import '../CSS/Contact.css';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    lastName: '',
-    firstName: '',
+    name: '',
+    firstname: '',
     email: '',
     phone: '',
     subject: 'Products',
@@ -30,12 +31,11 @@ const Contact = () => {
     const randomOperator = operators[Math.floor(Math.random() * operators.length)];
     const randomNum1 = Math.floor(Math.random() * 10) + 1;
     const randomNum2 = Math.floor(Math.random() * 10) + 1;
-    
+
     setNum1(randomNum1);
     setNum2(randomNum2);
     setOperator(randomOperator);
-    
-    // Calculer la réponse correcte
+
     let answer;
     switch (randomOperator) {
       case '+':
@@ -65,39 +65,41 @@ const Contact = () => {
     e.preventDefault();
     setLoading(true);
     setFormError(null);
-    
-    // Vérifier la réponse mathématique
+
     if (parseInt(formData.mathAnswer) !== correctAnswer) {
       setFormError("The calculation answer is incorrect. Please try again.");
       setLoading(false);
-      generateRandomCalculation(); // Générer un nouveau calcul
+      generateRandomCalculation();
       return;
     }
-    
-    try {
-      // Simulation d'envoi de formulaire - remplacer par un vrai appel API dans un environnement de production
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Form data submitted:", formData);
-      
-      // Réinitialiser le formulaire après soumission réussie
+
+    emailjs.sendForm(
+      'service_w6baxx9',
+      'template_zgdtf71',
+      e.target,
+      process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+    )
+    .then((result) => {
+      console.log('Email envoyé avec succès:', result.text);
+      setFormSubmitted(true);
+    })
+    .catch((error) => {
+      console.log("Erreur lors de l'envoi de l'email:", error.text);
+      setFormError("An error occurred while sending the email. Please try again.");
+    })
+    .finally(() => {
       setFormData({
-        lastName: '',
-        firstName: '',
+        name: '',
+        firstname: '',
         email: '',
         phone: '',
         subject: 'Products',
         message: '',
         mathAnswer: ''
       });
-      
-      setFormSubmitted(true);
-      generateRandomCalculation(); // Générer un nouveau calcul pour la prochaine soumission
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      setFormError("An error occurred while submitting the form. Please try again.");
-    } finally {
       setLoading(false);
-    }
+      generateRandomCalculation();
+    });
   };
 
   return (
@@ -108,7 +110,8 @@ const Contact = () => {
           <div className="contact-header">
             <h1>Contact Us</h1>
             <p className="contact-subtitle">
-              Have questions about our products or services ? <br></br>Get in touch with our team !
+              Have questions about our products or services ? <br />
+              Get in touch with our team !
             </p>
           </div>
 
@@ -122,7 +125,7 @@ const Contact = () => {
                   <p className="information">info@electricwatertoys.com</p>
                 </div>
               </div>
-              
+
               <div className="contact-info-item">
                 <i className="info-icon phone-icon"></i>
                 <div>
@@ -130,7 +133,7 @@ const Contact = () => {
                   <p className="information">09 27 51 48 92</p>
                 </div>
               </div>
-              
+
               <div className="contact-info-item">
                 <i className="info-icon fax-icon"></i>
                 <div>
@@ -138,15 +141,15 @@ const Contact = () => {
                   <p className="information">07 51 95 36 48</p>
                 </div>
               </div>
-              
+
               <div className="contact-info-item">
                 <i className="info-icon hours-icon"></i>
                 <div>
                   <h3>Office Hours</h3>
-                  <p className="information">Monday to Friday : <br></br>8am - 12pm & 1pm - 5pm</p>
+                  <p className="information">Monday to Friday : <br />8am - 12pm & 1pm - 5pm</p>
                 </div>
               </div>
-              
+
               <div className="contact-info-item">
                 <i className="info-icon address-icon"></i>
                 <div>
@@ -154,12 +157,11 @@ const Contact = () => {
                   <p className="information">27 Avenue des Champs, 06000 Nice, France</p>
                 </div>
               </div>
-              
             </div>
 
             <div className="contact-form-card">
               <h2>Send Us a Message</h2>
-              
+
               {formSubmitted ? (
                 <div className="form-success-message">
                   <div className="success-icon">✓</div>
@@ -172,66 +174,66 @@ const Contact = () => {
               ) : (
                 <form className="contact-form" onSubmit={handleSubmit}>
                   {formError && <div className="form-error">{formError}</div>}
-                  
+
                   <div className="form-row">
                     <div className="form-groupe">
-                      <label htmlFor="lastName">Last Name*</label>
-                      <input 
-                        id="lastName" 
-                        name="lastName" 
-                        type="text" 
-                        required 
+                      <label htmlFor="name">Last Name*</label>
+                      <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required
                         placeholder="Doe"
-                        value={formData.lastName}
-                        onChange={handleChange} 
+                        value={formData.name}
+                        onChange={handleChange}
                       />
                     </div>
-                    
+
                     <div className="form-groupe">
-                      <label htmlFor="firstName">First Name</label>
-                      <input 
-                        id="firstName" 
-                        name="firstName" 
-                        type="text" 
+                      <label htmlFor="firstname">First Name</label>
+                      <input
+                        id="firstname"
+                        name="firstname"
+                        type="text"
                         placeholder="John"
-                        value={formData.firstName}
-                        onChange={handleChange} 
+                        value={formData.firstname}
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
-                  
+
                   <div className="form-row">
                     <div className="form-groupe">
                       <label htmlFor="email">Email Address*</label>
-                      <input 
-                        id="email" 
-                        name="email" 
-                        type="email" 
-                        required 
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
                         placeholder="your.email@example.com"
                         value={formData.email}
-                        onChange={handleChange} 
+                        onChange={handleChange}
                       />
                     </div>
-                    
+
                     <div className="form-groupe">
                       <label htmlFor="phone">Phone*</label>
-                      <input 
-                        id="phone" 
-                        name="phone" 
-                        type="tel" 
-                        required 
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        required
                         placeholder="XX XX XX XX XX"
                         value={formData.phone}
-                        onChange={handleChange} 
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
-                  
+
                   <div className="form-groupe">
                     <label htmlFor="subject">Subject</label>
-                    <select 
-                      id="subject" 
+                    <select
+                      id="subject"
                       name="subject"
                       value={formData.subject}
                       onChange={handleChange}
@@ -242,41 +244,44 @@ const Contact = () => {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-                  
+
                   <div className="form-groupe">
-                    <label htmlFor="message">Message</label>
-                    <textarea 
-                      id="message" 
-                      name="message" 
+                    <label htmlFor="message">Message*</label>
+                    <textarea
+                      id="message"
+                      name="message"
                       placeholder="Please type your message here..."
                       rows="4"
+                      required
                       value={formData.message}
                       onChange={handleChange}
                     ></textarea>
                   </div>
-                  
+
                   <div className="form-groupe captcha-group">
                     <label htmlFor="mathAnswer">Verification: Calculate {num1} {operator} {num2}*</label>
-                    <input 
-                      id="mathAnswer" 
-                      name="mathAnswer" 
-                      type="number" 
-                      required 
+                    <input
+                      id="mathAnswer"
+                      name="mathAnswer"
+                      type="number"
+                      required
                       placeholder="Enter your answer"
                       value={formData.mathAnswer}
-                      onChange={handleChange} 
+                      onChange={handleChange}
                     />
                   </div>
-                  
+
                   <div className="form-footer">
-                    <p className="required-fields">* Required fields</p>
-                    <button 
-                      className="submit-btn" 
-                      type="submit" 
-                      disabled={loading}
-                    >
-                      {loading ? 'Sending...' : 'Send Message'}
-                    </button>
+                    <div className="submit-section">
+                      <p className="required-fields">* Required fields</p>
+                      <button
+                        className="submit-btn"
+                        type="submit"
+                        disabled={loading}
+                      >
+                        {loading ? 'Sending...' : 'Send Message'}
+                      </button>
+                    </div>
                   </div>
                 </form>
               )}

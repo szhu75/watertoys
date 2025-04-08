@@ -1,3 +1,4 @@
+// src/components/JS/AdminDashboard.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -36,6 +37,44 @@ const AdminDashboard = () => {
   
   // Récupérer les informations de l'utilisateur
   const [user, setUser] = useState({});
+
+  // Fonction pour valider le token administrateur
+  const validateAdminToken = () => {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    console.log("Validation du token administrateur:");
+    console.log("Token présent:", !!token);
+    console.log("Utilisateur:", user);
+    console.log("Est admin selon localStorage:", user.isAdmin === true || user.role === 'admin');
+    
+    if (!token) {
+      console.error("Token manquant - Déconnexion nécessaire");
+      return false;
+    }
+    
+    try {
+      // Décoder manuellement le token pour vérifier (ne pas utiliser en production)
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        console.error("Format de token invalide");
+        return false;
+      }
+      
+      const decodedBase64 = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const decodedStr = atob(decodedBase64);
+      const payload = JSON.parse(decodedStr);
+      
+      console.log("Payload du token:", payload);
+      console.log("Le token contient isAdmin:", payload.isAdmin === true);
+      console.log("Le token contient le rôle admin:", payload.role === 'admin');
+      
+      return payload.isAdmin === true || payload.role === 'admin';
+    } catch (err) {
+      console.error("Erreur lors du décodage du token:", err);
+      return false;
+    }
+  };
 
   // Fonction pour récupérer le token JWT - mémorisée pour éviter les recréations à chaque rendu
   const getToken = useCallback(() => localStorage.getItem('token'), []);
@@ -93,21 +132,111 @@ const AdminDashboard = () => {
     }
   }, []);
 
-  // Récupérer les commandes
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get('http://localhost:5000/api/orders', getAuthHeaders());
-      console.log('Commandes récupérées:', response.data);
-      setOrders(Array.isArray(response.data) ? response.data : []);
-      setError(null);
-    } catch (err) {
-      console.error('Erreur lors de la récupération des commandes:', err);
-      setError('Impossible de récupérer les commandes. Veuillez réessayer.');
-    } finally {
+  // Fonction de débogage pour les commandes
+  const debugOrders = () => {
+    console.log("Statut de loading:", loading);
+    console.log("Erreur:", error);
+    console.log("Tableau des commandes:", orders);
+    console.log("Utilisateur actuel:", user);
+    console.log("Est admin?", user.isAdmin);
+    
+    // Tester l'API directement
+    const token = localStorage.getItem('token');
+    console.log("Token actuel:", token);
+    
+    // Essayer explicitement la route de débogage
+    axios.get('http://localhost:5000/api/orders/debug/all', {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      console.log('TEST API - Commandes récupérées:', response.data);
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        setOrders(response.data);
+      } else {
+        console.log("Aucune commande trouvée via débogage");
+        
+        // Utiliser des données de test si nécessaire
+        const testOrders = [{
+          id: 336398,
+          user: {
+            firstName: 'Clément',
+            lastName: 'Bounadi',
+            email: 'test123@gmail.com'
+          },
+          totalAmount: 4199.99,
+          status: 'pending',
+          orderDate: '2025-04-07'
+        }];
+        
+        console.log('Données de test utilisées:', testOrders);
+        setOrders(testOrders);
+      }
+    })
+    .catch(err => {
+      console.error('TEST API - Erreur route debug:', err.response ? err.response.data : err.message);
+      
+      // Si la route de débogage échoue, essayer la route principale
+      axios.get('http://localhost:5000/api/orders', {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        console.log('TEST API (route principale) - Commandes récupérées:', response.data);
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setOrders(response.data);
+        }
+      })
+      .catch(mainErr => {
+        console.error('TEST API - Erreur route principale:', mainErr.response ? mainErr.response.data : mainErr.message);
+      });
+    });
+  };
+
+  // Récupérer les commandes - version améliorée
+// Section à remplacer dans AdminDashboard.js pour la gestion des commandes
+const fetchOrders = useCallback(async () => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError("Token manquant. Veuillez vous reconnecter.");
       setLoading(false);
+      return;
     }
-  }, [getAuthHeaders]);
+
+    // Utiliser la route principale pour les admins
+    const response = await axios.get('http://localhost:5000/api/orders', {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('Commandes récupérées avec succès:', response.data);
+    
+    if (Array.isArray(response.data)) {
+      setOrders(response.data);
+      setError(null);
+    } else {
+      console.error("Format de données invalide:", response.data);
+      setError("Format de données invalide reçu du serveur");
+    }
+  } catch (error) {
+    console.error('Erreur lors de la récupération des commandes:', error);
+    const errorMsg = error.response 
+      ? `Erreur: ${error.response.status} - ${error.response.data.message || 'Erreur serveur'}`
+      : "Le serveur ne répond pas. Vérifiez votre connexion.";
+    
+    setError(errorMsg);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   // Récupérer les utilisateurs
   const fetchUsers = useCallback(async () => {
@@ -330,7 +459,7 @@ const AdminDashboard = () => {
   }, [fetchProducts, getToken]);
 
   // Mettre à jour le statut d'une commande
-  const updateOrderStatus = useCallback(async (orderId, status) => {
+  const handleUpdateOrderStatus = useCallback(async (orderId, status) => {
     setLoading(true);
     try {
       const response = await axios.put(
@@ -368,6 +497,10 @@ const AdminDashboard = () => {
     }
     
     setUser(userInfo);
+    
+    // Valider le token admin
+    const isValidAdmin = validateAdminToken();
+    console.log("Validation admin:", isValidAdmin);
     
     // Charger les données initiales
     fetchProducts();
@@ -482,11 +615,6 @@ const AdminDashboard = () => {
     await emptyTrash();
   };
 
-  // Gérer la mise à jour du statut d'une commande
-  const handleUpdateOrderStatus = async (orderId, newStatus) => {
-    await updateOrderStatus(orderId, newStatus);
-  };
-
   // Gérer le retour à la page précédente
   const handleGoBack = () => {
     navigate('/');
@@ -499,15 +627,15 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
-  // Fonction pour rafraîchir les données
-  const refreshData = () => {
-    fetchProducts();
-    fetchOrders();
-    fetchUsers();
-    if (showTrash) {
-      fetchTrashedProducts();
-    }
-  };
+  // // Fonction pour rafraîchir les données
+  // const refreshData = () => {
+  //   fetchProducts();
+  //   fetchOrders();
+  //   fetchUsers();
+  //   if (showTrash) {
+  //     fetchTrashedProducts();
+  //   }
+  // };
 
   // Basculer l'affichage de la corbeille
   const toggleTrashView = () => {
@@ -516,6 +644,11 @@ const AdminDashboard = () => {
     if (newTrashState) {
       fetchTrashedProducts();
     }
+  };
+
+  // Voir les détails d'une commande
+  const viewOrderDetails = (orderId) => {
+    navigate(`/order/${orderId}`);
   };
 
   return (
@@ -528,11 +661,6 @@ const AdminDashboard = () => {
               <i className="arrow-icon">←</i>
             </button>
             <h1>Tableau de Bord Administrateur</h1>
-          </div>
-          <div className="header-actions">
-            <button className="refresh-btn" onClick={refreshData} disabled={loading}>
-              ↻ Actualiser
-            </button>
           </div>
         </header>
 
@@ -563,7 +691,7 @@ const AdminDashboard = () => {
                 onClick={() => setActiveSection('users')}
               >
                 Utilisateurs
-              </li>
+            </li>
               <li onClick={handleLogout}>
                 Déconnexion
               </li>
@@ -684,7 +812,7 @@ const AdminDashboard = () => {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="form-actions">
                         <button type="submit" className="submit-btn" disabled={loading}>
                           {editingProduct ? 'Mettre à jour' : 'Ajouter'}
@@ -826,7 +954,7 @@ const AdminDashboard = () => {
                                 )}
                               </td>
                               <td>{product.name}</td>
-                              <td>{product.price !== undefined ? `${parseFloat(product.price.price).toFixed(2)}€` : 'Prix N/A'}</td>
+                              <td>{product.price !== undefined ? `${parseFloat(product.price).toFixed(2)}€` : 'Prix N/A'}</td>
                               <td>{product.category ? product.category.name : 'Catégorie N/A'}</td>
                               <td>
                                 {product.deletedAt 
@@ -859,77 +987,112 @@ const AdminDashboard = () => {
               </section>
             )}
 
-            {activeSection === 'orders' && (
-              <section className="orders-management">
-                <h2>Gestion des Commandes ({orders.length})</h2>
-                
-                {orders.length === 0 ? (
-                  <p className="empty-message">Aucune commande disponible</p>
-                ) : (
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Client</th>
-                        <th>Date</th>
-                        <th>Produits</th>
-                        <th>Total</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orders.map(order => (
-                        <tr key={order.id}>
-                          <td>
-                            {order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Utilisateur inconnu'}
-                            <br />
-                            <small>{order.user?.email}</small>
-                          </td>
-                          <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                          <td>
-                            {order.orderItems ? (
-                              <ul className="order-items-list">
-                                {order.orderItems.map((item, index) => (
-                                  <li key={index}>
-                                    {item.product?.name || 'Produit inconnu'} x{item.quantity}
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              'Aucun détail disponible'
-                            )}
-                          </td>
-                          <td>{order.totalAmount}€</td>
-                          <td>
-                            <span className={`status-badge status-${order.status.toLowerCase()}`}>
-                              {order.status}
-                            </span>
-                          </td>
-                          <td>
-                            <select 
-                              value={order.status}
-                              onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
-                              disabled={loading}
-                            >
-                              <option value="pending">En attente</option>
-                              <option value="processing">En traitement</option>
-                              <option value="shipped">Expédié</option>
-                              <option value="delivered">Livré</option>
-                              <option value="cancelled">Annulé</option>
-                            </select>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </section>
-            )}
+{activeSection === 'orders' && (
+  <section className="orders-management">
+    <h2>Gestion des Commandes</h2>
+    <div className="section-header">
+      <button 
+        className="refresh-btn" 
+        onClick={fetchOrders}
+        disabled={loading}
+      >
+        ↻ Actualiser les commandes
+      </button>
+    </div>
+
+    {loading && <div className="loading-indicator">Chargement des commandes...</div>}
+    
+    {error && (
+      <div className="error-message">
+        <p>{error}</p>
+        <button onClick={fetchOrders}>Réessayer</button>
+      </div>
+    )}
+
+    {!loading && !error && orders.length === 0 ? (
+      <div className="empty-message">
+        <p>Aucune commande disponible</p>
+        <p className="small-text">Les commandes passées par les utilisateurs apparaîtront ici.</p>
+      </div>
+    ) : (
+      <div className="orders-table-container">
+        <table className="orders-table">
+          <thead>
+            <tr>
+              <th>N° Commande</th>
+              <th>Client</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map(order => (
+              <tr key={order.id}>
+                <td>#{order.id}</td>
+                <td>
+                  {order.user ? (
+                    <>
+                      <div>{order.user.firstName} {order.user.lastName}</div>
+                      <small>{order.user.email}</small>
+                    </>
+                  ) : (
+                    'Utilisateur inconnu'
+                  )}
+                </td>
+                <td>
+                  {order.orderDate ? 
+                    new Date(order.orderDate).toLocaleDateString('fr-FR') : 
+                    new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                </td>
+                <td>
+                  {typeof order.totalAmount === 'number' 
+                    ? order.totalAmount.toFixed(2) 
+                    : parseFloat(order.totalAmount).toFixed(2)}€
+                </td>
+                <td>
+                  <span className={`status-badge status-${order.status}`}>
+                    {order.status === 'pending' ? 'En attente' : 
+                     order.status === 'processing' ? 'En traitement' : 
+                     order.status === 'shipped' ? 'Expédié' : 
+                     order.status === 'delivered' ? 'Livré' : 
+                     order.status === 'cancelled' ? 'Annulé' : order.status}
+                  </span>
+                </td>
+                <td>
+                  <button 
+                    className="view-btn"
+                    onClick={() => viewOrderDetails(order.id)}
+                  >
+                    Détails
+                  </button>
+                  <select 
+                    value={order.status}
+                    onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
+                    disabled={loading}
+                    className="status-select"
+                  >
+                    <option value="pending">En attente</option>
+                    <option value="processing">En traitement</option>
+                    <option value="shipped">Expédié</option>
+                    <option value="delivered">Livré</option>
+                    <option value="cancelled">Annulé</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+)}
 
             {activeSection === 'users' && (
               <section className="users-management">
                 <h2>Gestion des Utilisateurs ({users.length})</h2>
-                
+
                 {users.length === 0 ? (
                   <p className="empty-message">Aucun utilisateur disponible</p>
                 ) : (

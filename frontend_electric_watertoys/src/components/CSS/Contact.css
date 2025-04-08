@@ -282,7 +282,7 @@ body, html {
 .form-groupe input,
 .form-groupe select,
 .form-groupe textarea {
-  width: 100%;
+  width: 90%;
   padding: 0.9rem 1rem;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -291,6 +291,12 @@ body, html {
   font-size: 1rem;
   transition: all 0.3s ease;
   font-family: inherit;
+}
+
+/* Style pour que les options du select soient visibles */
+.form-groupe select option {
+  background-color: #a8d5ff;
+  color: #ffffff;
 }
 
 .form-groupe input:focus,
@@ -333,7 +339,6 @@ body, html {
 .required-fields {
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.85rem;
-  margin: 0;
 }
 
 .submit-btn {
