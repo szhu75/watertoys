@@ -107,24 +107,25 @@ const Head = ({ cart }) => {
             )}
             {isHovered && userCart.length > 0 && (
               <div className="cart-popup">
-                <h4>Contenu du Panier :</h4>
-                <ul>
-                  {userCart.map((item, index) => (
-                    <li key={index}>
-                      {item.product.name} - {item.product.price}€ x {item.quantity}
-                    </li>
-                  ))}
-                </ul>
-                <div className="cart-popup-summary">
-                  <p>Total: {calculateTotalCartPrice()}€</p>
-                  <button 
-                    className="view-cart-btn"
-                    onClick={handleCartClick}
-                  >
-                    Voir mon panier
-                  </button>
-                </div>
+              <h4>Cart Contents:</h4>
+              <ul>
+                {userCart.map((item, index) => (
+                  <li key={index}>
+                    {item.product.name} - {item.product.price}€ x {item.quantity}
+                  </li>
+                ))}
+              </ul>
+              <div className="cart-popup-summary">
+                <p>Total: {calculateTotalCartPrice()}€</p>
+                <button 
+                  className="view-cart-btn"
+                  onClick={handleCartClick}
+                >
+                  View My Cart
+                </button>
               </div>
+            </div>
+            
             )}
           </div>
           <div

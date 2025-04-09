@@ -44,7 +44,7 @@ const LoginSignup = () => {
     // Validation côté client
     if (!isLogin) {
       if (formData.password !== formData.confirmPassword) {
-        setError('Les mots de passe ne correspondent pas');
+        setError('Passwords do not match');
         setLoading(false);
         return;
       }
@@ -79,17 +79,17 @@ const LoginSignup = () => {
         
         // Rediriger vers le tableau de bord approprié
         if (user && (user.role === 'admin' || user.isAdmin === true)) {
-          console.log("Redirection vers le tableau de bord administrateur");
+          console.log("Redirecting to admin dashboard");
           navigate('/admin-dashboard');
         } else {
-          console.log("Redirection vers le tableau de bord utilisateur");
+          console.log("Redirecting to user dashboard");
           navigate('/dashboard');
         }
       } else {
         setError(result.message);
       }
     } catch (err) {
-      setError('Une erreur est survenue lors de la connexion');
+      setError('An error occurred during login');
     } finally {
       setLoading(false);
     }
@@ -112,12 +112,12 @@ const LoginSignup = () => {
           <h1>Electric Water Toys</h1>
         </div>
         
-        <h2>{isLogin ? 'Connexion' : 'Inscription'}</h2>
+        <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
         
         {/* Afficher un message si l'utilisateur vient de la page produits */}
         {localStorage.getItem('pendingProductId') && (
           <div className="info-message">
-            <p>Connectez-vous pour ajouter le produit à votre panier</p>
+            <p>Log in to add the product to your cart</p>
           </div>
         )}
         
@@ -125,7 +125,7 @@ const LoginSignup = () => {
           {!isLogin && (
             <>
               <div className="form-group">
-                <label htmlFor="username">Nom d'utilisateur</label>
+                <label htmlFor="username">Username</label>
                 <input
                   type="text"
                   id="username"
@@ -133,12 +133,12 @@ const LoginSignup = () => {
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  placeholder="Votre nom d'utilisateur"
+                  placeholder="Your username"
                 />
               </div>
               
               <div className="form-group">
-                <label htmlFor="firstName">Prénom</label>
+                <label htmlFor="firstName">First Name</label>
                 <input
                   type="text"
                   id="firstName"
@@ -146,12 +146,12 @@ const LoginSignup = () => {
                   value={formData.firstName}
                   onChange={handleChange}
                   required
-                  placeholder="Votre prénom"
+                  placeholder="Your first name"
                 />
               </div>
               
               <div className="form-group">
-                <label htmlFor="lastName">Nom</label>
+                <label htmlFor="lastName">Last Name</label>
                 <input
                   type="text"
                   id="lastName"
@@ -159,7 +159,7 @@ const LoginSignup = () => {
                   value={formData.lastName}
                   onChange={handleChange}
                   required
-                  placeholder="Votre nom"
+                  placeholder="Your last name"
                 />
               </div>
             </>
@@ -174,12 +174,12 @@ const LoginSignup = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              placeholder="Votre adresse email"
+              placeholder="Your email address"
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="password">Mot de passe</label>
+            <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
@@ -188,13 +188,13 @@ const LoginSignup = () => {
               onChange={handleChange}
               required
               minLength="8"
-              placeholder="Mot de passe (8 caractères min.)"
+              placeholder="Password (min. 8 characters)"
             />
           </div>
           
           {!isLogin && (
             <div className="form-group">
-              <label htmlFor="confirmPassword">Confirmer le mot de passe</label>
+              <label htmlFor="confirmPassword">Confirm Password</label>
               <input
                 type="password"
                 id="confirmPassword"
@@ -203,7 +203,7 @@ const LoginSignup = () => {
                 onChange={handleChange}
                 required
                 minLength="8"
-                placeholder="Confirmez votre mot de passe"
+                placeholder="Confirm your password"
               />
             </div>
           )}
@@ -211,17 +211,17 @@ const LoginSignup = () => {
           {error && <div className="error-message">{error}</div>}
           
           <button type="submit" className="submit-btn" disabled={loading}>
-            {isLogin ? 'Se connecter' : 'S\'inscrire'}
+            {isLogin ? 'Log In' : 'Sign Up'}
             {loading && ' ...'}
           </button>
           
           <div className="toggle-form">
             <p>
               {isLogin 
-                ? "Vous n'avez pas de compte ? " 
-                : "Vous avez déjà un compte ? "}
+                ? "Don't have an account? " 
+                : "Already have an account? "}
               <span onClick={toggleForm}>
-                {isLogin ? 'Inscrivez-vous' : 'Connectez-vous'}
+                {isLogin ? 'Sign up' : 'Log in'}
               </span>
             </p>
           </div>

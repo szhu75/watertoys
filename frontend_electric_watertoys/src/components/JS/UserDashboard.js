@@ -6,6 +6,26 @@ import '../CSS/UserDashboard.css';
 import Header from './Header';
 import Footer from './Footer';
 
+// Fonction qui génère une signature pour une commande
+const generateOrderSignature = (order) => {
+  const items = order.items ? order.items.slice().sort((a, b) => {
+    const aId = a.productId || (a.product && a.product.id) || 0;
+    const bId = b.productId || (b.product && b.product.id) || 0;
+    return aId - bId;
+  }) : [];
+
+  const signatureObj = {
+    totalAmount: order.totalAmount,
+    orderDate: order.orderDate,
+    items: items.map(item => ({
+      productId: item.productId || (item.product && item.product.id) || null,
+      quantity: item.quantity,
+      price: item.unitPrice || (item.product && item.product.price) || null
+    }))
+  };
+  return JSON.stringify(signatureObj);
+};
+
 const UserDashboard = () => {
   const [user, setUser] = useState({});
   const [orders, setOrders] = useState([]);
@@ -15,7 +35,7 @@ const UserDashboard = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Récupérer le panier de l'utilisateur
   const fetchCart = useCallback(async () => {
     try {
@@ -23,7 +43,7 @@ const UserDashboard = () => {
       setError(null);
       const token = localStorage.getItem('token');
       console.log("Récupération du panier avec le token:", token);
-      
+
       // Vérifier si le panier vient d'être vidé après une commande
       const cartCleared = localStorage.getItem('cartCleared');
       if (cartCleared === 'true') {
@@ -53,76 +73,47 @@ const UserDashboard = () => {
       setLoading(false);
     }
   }, [navigate]);
-  
-  // Récupérer les commandes de l'utilisateur
+
+  // Récupérer les commandes réelles issues de l'API avec déduplication par signature
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Tentative de récupération des commandes depuis l'API
+      const token = localStorage.getItem('token');
       let apiOrders = [];
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const response = await axios.get('http://localhost:5000/api/orders/user', {
-            headers: { 
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            params: {
-              _t: new Date().getTime() // Éviter le cache
-            }
-          });
-          
-          if (Array.isArray(response.data)) {
-            apiOrders = response.data;
-            console.log("Commandes récupérées depuis l'API:", apiOrders);
+      if (token) {
+        const response = await axios.get('http://localhost:5000/api/orders/user', {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          params: {
+            _t: new Date().getTime() // Éviter le cache
           }
-        }
-      } catch (error) {
-        console.error('Erreur lors de la récupération des commandes depuis l\'API:', error);
-      }
-      
-      // Récupérer également les commandes simulées localement
-      let clientOrders = [];
-      const clientOrdersStr = localStorage.getItem('clientOrders');
-      if (clientOrdersStr) {
-        try {
-          clientOrders = JSON.parse(clientOrdersStr);
-          console.log("Commandes simulées récupérées du localStorage:", clientOrders);
-          
-          // Ajouter une propriété pour identifier les commandes simulées
-          clientOrders = clientOrders.map(order => ({
-            ...order,
-            isClientOrder: true
-          }));
-        } catch (e) {
-          console.error('Erreur lors du parsing des commandes locales:', e);
+        });
+        
+        if (Array.isArray(response.data)) {
+          apiOrders = response.data;
+          console.log("Commandes récupérées depuis l'API:", apiOrders);
         }
       }
-      
-      // Déduplication des commandes
-      const orderMap = new Map();
-      
-      // Ajouter d'abord les commandes API
+
+      // Déduplication basée sur la signature des commandes
+      const uniqueOrdersMap = new Map();
       apiOrders.forEach(order => {
-        orderMap.set(order.id.toString(), order);
+        const signature = generateOrderSignature(order);
+        if (!uniqueOrdersMap.has(signature)) {
+          uniqueOrdersMap.set(signature, order);
+        }
       });
+      const uniqueOrders = Array.from(uniqueOrdersMap.values());
       
-      // Ajouter les commandes client, elles remplacent celles de l'API si même ID
-      clientOrders.forEach(order => {
-        orderMap.set(order.id.toString(), order);
-      });
+      // Trier par date décroissante (les plus récentes en premier)
+      uniqueOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
       
-      // Convertir la Map en tableau
-      const allOrders = Array.from(orderMap.values());
-      
-      // Trier par date (les plus récentes d'abord)
-      allOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-      
-      setOrders(allOrders);
-      console.log("Total des commandes combinées (sans doublons):", allOrders.length);
+      setOrders(uniqueOrders);
+      console.log("Total des commandes (API uniquement, uniques):", uniqueOrders.length);
       
     } catch (error) {
       console.error('Erreur lors de la récupération des commandes:', error);
@@ -131,37 +122,65 @@ const UserDashboard = () => {
       setLoading(false);
     }
   }, []);
-  
-  // Supprimer une commande
-  const deleteOrder = useCallback((orderId) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande ?")) {
+
+  // Supprimer une commande réelle et ses doublons basés sur la signature
+  const deleteRealOrder = useCallback(async (orderId) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.")) {
       try {
-        // Récupérer les commandes existantes
-        const clientOrdersStr = localStorage.getItem('clientOrders');
-        if (clientOrdersStr) {
-          const clientOrders = JSON.parse(clientOrdersStr);
-          
-          // Filtrer pour enlever la commande à supprimer
-          const updatedOrders = clientOrders.filter(
-            order => order.id.toString() !== orderId.toString()
-          );
-          
-          // Sauvegarder les commandes mises à jour
-          localStorage.setItem('clientOrders', JSON.stringify(updatedOrders));
-          
-          // Rafraîchir la liste des commandes
-          fetchOrders();
-          
-          // Notification
-          alert('Commande supprimée avec succès!');
+        setLoading(true);
+        setError(null);
+        const token = localStorage.getItem('token');
+
+        // Récupérer l'objet commande à supprimer pour obtenir sa signature
+        const orderToDelete = orders.find(o => o.id.toString() === orderId.toString());
+        if (!orderToDelete) {
+          alert("Commande introuvable.");
+          return;
         }
+        const signature = generateOrderSignature(orderToDelete);
+        
+        // Trouver tous les enregistrements ayant la même signature (les doublons)
+        const duplicateOrders = orders.filter(o => generateOrderSignature(o) === signature);
+        
+        // Supprimer chaque enregistrement via l'API
+        for (const order of duplicateOrders) {
+          try {
+            await axios.delete(`http://localhost:5000/api/orders/${order.id}`, {
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+          } catch (err) {
+            console.error(`Erreur lors de la suppression de la commande id ${order.id}:`, err);
+            // Vous pouvez choisir de stopper ou continuer la suppression des autres doublons
+          }
+        }
+        
+        // Mise à jour de la liste des commandes
+        await fetchOrders();
+        alert('Commande et ses doublons supprimées avec succès!');
       } catch (error) {
         console.error('Erreur lors de la suppression de la commande:', error);
-        alert('Erreur lors de la suppression de la commande. Veuillez réessayer.');
+        
+        let errorMessage = 'Erreur lors de la suppression de la commande.';
+        if (error.response) {
+          if (error.response.status === 404) {
+            errorMessage = 'Cette commande n\'existe pas ou ne peut plus être supprimée.';
+          } else if (error.response.status === 403) {
+            errorMessage = 'Vous n\'êtes pas autorisé à supprimer cette commande.';
+          } else if (error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+          }
+        }
+        setError(errorMessage);
+        alert(errorMessage);
+      } finally {
+        setLoading(false);
       }
     }
-  }, [fetchOrders]);
-  
+  }, [fetchOrders, orders]);
+
   // Supprimer un article du panier
   const removeFromCart = useCallback(async (itemId) => {
     try {
@@ -184,8 +203,6 @@ const UserDashboard = () => {
       );
       
       console.log("Réponse de la suppression:", response.data);
-      
-      // Rafraîchir le panier
       fetchCart();
     } catch (error) {
       console.error('Erreur lors de la suppression de l\'article:', error);
@@ -207,15 +224,13 @@ const UserDashboard = () => {
       setLoading(false);
     }
   }, [fetchCart, navigate]);
-  
+
   // Mettre à jour la quantité d'un article dans le panier
   const updateCartItemQuantity = useCallback(async (itemId, newQuantity) => {
     if (newQuantity < 1) {
-      // Si la quantité est inférieure à 1, supprimer l'article
       removeFromCart(itemId);
       return;
     }
-
     try {
       setLoading(true);
       setError(null);
@@ -238,8 +253,6 @@ const UserDashboard = () => {
       );
       
       console.log("Réponse de la mise à jour:", response.data);
-      
-      // Rafraîchir le panier après la mise à jour
       fetchCart();
     } catch (error) {
       console.error('Erreur lors de la mise à jour de la quantité:', error);
@@ -261,7 +274,7 @@ const UserDashboard = () => {
       setLoading(false);
     }
   }, [fetchCart, navigate, removeFromCart]);
-  
+
   // Vider complètement le panier
   const clearCart = useCallback(async () => {
     if (window.confirm("Êtes-vous sûr de vouloir vider votre panier ?")) {
@@ -280,9 +293,7 @@ const UserDashboard = () => {
           }
         );
         
-        // Mettre à jour l'état local
         setCart([]);
-        
         alert('Votre panier a été vidé avec succès.');
       } catch (error) {
         console.error('Erreur lors du vidage du panier:', error);
@@ -292,14 +303,11 @@ const UserDashboard = () => {
       }
     }
   }, []);
-  
+
   // Passer à la page de paiement
   const checkout = useCallback(() => {
     try {
-      // Calculer le montant total du panier
       const totalAmount = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-      
-      // Rediriger vers la page de paiement avec les informations du panier
       navigate('/payment', { 
         state: { 
           orderDetails: {
@@ -313,7 +321,7 @@ const UserDashboard = () => {
       setError('Erreur lors de la préparation du paiement. Veuillez réessayer.');
     }
   }, [cart, navigate]);
-  
+
   // Déconnexion
   const handleLogout = useCallback(() => {
     localStorage.removeItem('user');
@@ -321,77 +329,12 @@ const UserDashboard = () => {
     navigate('/');
   }, [navigate]);
 
-  // Supprimer une commande réelle de l'API
-    // Ajouter cette fonction dans UserDashboard.js
-const deleteRealOrder = useCallback(async (orderId) => {
-  if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.")) {
-    try {
-      setLoading(true);
-      setError(null);
-      const token = localStorage.getItem('token');
-      
-      // Appeler l'API pour supprimer la commande
-      await axios.delete(
-        `http://localhost:5000/api/orders/${orderId}`,
-        {
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      // Rafraîchir la liste des commandes
-      fetchOrders();
-        
-        // Notification
-        alert('Commande supprimée avec succès!');
-      } catch (error) {
-        console.error('Erreur lors de la suppression de la commande:', error);
-        
-        let errorMessage = 'Erreur lors de la suppression de la commande.';
-        if (error.response) {
-          if (error.response.status === 404) {
-            errorMessage = 'Cette commande n\'existe pas ou ne peut plus être supprimée.';
-          } else if (error.response.status === 403) {
-            errorMessage = 'Vous n\'êtes pas autorisé à supprimer cette commande.';
-          } else if (error.response.data && error.response.data.message) {
-            errorMessage = error.response.data.message;
-          }
-        }
-        
-        setError(errorMessage);
-        alert(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [fetchOrders]);
-  
-  // Fonction pour voir les détails d'une commande
+  // Fonction pour voir les détails d'une commande réelle
   const viewOrderDetails = useCallback((orderId) => {
-    // Pour une commande simulée, afficher les détails directement
-    const clientOrdersStr = localStorage.getItem('clientOrders');
-    if (clientOrdersStr) {
-      try {
-        const clientOrders = JSON.parse(clientOrdersStr);
-        const order = clientOrders.find(o => o.id.toString() === orderId.toString());
-        
-        if (order) {
-          // Afficher les détails sous forme d'alerte (simple pour l'exemple)
-          alert(`Commande #${order.id}\nDate: ${new Date(order.orderDate).toLocaleDateString()}\nMontant: ${order.totalAmount.toFixed(2)}€\nStatut: ${order.status}\n\nProduits commandés:\n${order.items.map(item => `${item.productName} x${item.quantity} (${item.unitPrice}€)`).join('\n')}`);
-          return;
-        }
-      } catch (e) {
-        console.error('Erreur lors du parsing des commandes locales:', e);
-      }
-    }
-    
-    // Sinon, naviguer vers la page de détails (pour les commandes de l'API)
     navigate(`/order/${orderId}`);
   }, [navigate]);
-  
-  // Fonction pour rafraîchir manuellement les commandes
+
+  // Rafraîchir manuellement les commandes
   const refreshOrders = () => {
     console.log("Rafraîchissement manuel des commandes");
     fetchOrders();
@@ -413,42 +356,19 @@ const deleteRealOrder = useCallback(async (orderId) => {
       return;
     }
     
-    // Vérifier les paramètres d'URL pour le changement de section
     const searchParams = new URLSearchParams(location.search);
     const sectionParam = searchParams.get('section');
     const refreshParam = searchParams.get('refresh');
     
-    // Toujours récupérer le panier
     fetchCart();
     
-    // Si on est redirigé vers la section des commandes avec un indicateur de rafraîchissement
     if (sectionParam === 'orders' && refreshParam === 'true') {
       setActiveTab('orders');
-      
-      // Forcer le rechargement des commandes
       console.log("Rafraîchissement des commandes demandé explicitement");
       fetchOrders();
-      
-      // Nettoyer les paramètres d'URL
       navigate('/dashboard', { replace: true });
-      
-      // Afficher un message si on vient de créer une commande
-      const orderJustCreated = localStorage.getItem('orderJustCreated');
-      if (orderJustCreated === 'true') {
-        console.log('Commande créée, affichage du message de confirmation');
-        setTimeout(() => {
-          alert('Votre commande a été ajoutée à votre historique!');
-          localStorage.removeItem('orderJustCreated');
-          localStorage.removeItem('newOrderId');
-        }, 500);
-      }
-    } 
-    // Pour les autres cas
-    else {
-      // Charger les commandes au démarrage
+    } else {
       fetchOrders();
-      
-      // Changer d'onglet si nécessaire
       if (sectionParam === 'cart') {
         setActiveTab('cart');
         navigate('/dashboard', { replace: true });
@@ -500,7 +420,6 @@ const deleteRealOrder = useCallback(async (orderId) => {
                 <p><strong>Nom:</strong> {user.lastName}</p>
                 <p><strong>Prénom:</strong> {user.firstName}</p>
                 <p><strong>Email:</strong> {user.email}</p>
-            
               </div>
             </div>
           )}
@@ -655,14 +574,7 @@ const deleteRealOrder = useCallback(async (orderId) => {
                             
                             <button 
                               className="delete-order-btn"
-                              onClick={() => {
-                                // Utiliser différentes fonctions selon le type de commande
-                                if (order.isClientOrder) {
-                                  deleteOrder(order.id);
-                                } else {
-                                  deleteRealOrder(order.id);
-                                }
-                              }}
+                              onClick={() => deleteRealOrder(order.id)}
                               disabled={loading || (order.status && order.status !== 'pending')}
                               title={order.status && order.status !== 'pending' ? 
                                 "Seules les commandes en attente peuvent être supprimées" : 

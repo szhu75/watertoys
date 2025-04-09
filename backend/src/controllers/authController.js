@@ -25,12 +25,12 @@ exports.signup = async (req, res) => {
     }
 
     res.status(201).send({ 
-      message: "Utilisateur enregistré avec succès!", 
+      message: "User successfully registered!", 
       userId: user.id 
     });
   } catch (error) {
     res.status(500).send({ 
-      message: "Erreur lors de l'enregistrement de l'utilisateur",
+      message: "Error registering user",
       error: error.message 
     });
   }
@@ -44,7 +44,7 @@ exports.signin = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).send({ message: "Utilisateur non trouvé." });
+      return res.status(404).send({ message: "User not found." });
     }
 
     // Vérifier le mot de passe
@@ -56,7 +56,7 @@ exports.signin = async (req, res) => {
     if (!passwordIsValid) {
       return res.status(401).send({
         accessToken: null,
-        message: "Mot de passe invalide!"
+        message: "Invalid password!"
       });
     }
 
@@ -82,7 +82,7 @@ exports.signin = async (req, res) => {
     });
 
     // Log pour déboguer
-    console.log("Utilisateur connecté:", {
+    console.log("User logged in:", {
       id: user.id,
       email: user.email,
       isAdmin: user.isAdmin,
@@ -100,9 +100,9 @@ exports.signin = async (req, res) => {
       accessToken: token
     });
   } catch (error) {
-    console.error("Erreur lors de la connexion:", error);
+    console.error("Error during login:", error);
     res.status(500).send({ 
-      message: "Erreur lors de la connexion",
+      message: "Error during login",
       error: error.message 
     });
   }

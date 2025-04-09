@@ -29,8 +29,11 @@ exports.createOrder = async (req, res) => {
         model: CartItem,
         as: 'items',
         include: [{ model: Product, as: 'product' }]
-      }]
+      }],
+      transaction,
+      lock: transaction.LOCK.UPDATE  // Ajout du verrouillage
     });
+    
     
     if (!cart || !cart.items || cart.items.length === 0) {
       await transaction.rollback();
