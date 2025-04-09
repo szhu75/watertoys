@@ -15,18 +15,31 @@ const LoginSignup = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [authSuccess, setAuthSuccess] = useState(false);
   const navigate = useNavigate();
   
   // Utiliser le contexte d'authentification
   const { login, register, isAuthenticated } = useAuth();
 
-  // Rediriger si déjà connecté
+  // Gérer la redirection après authentification
   useEffect(() => {
-    if (isAuthenticated) {
-      const redirectPath = localStorage.getItem('redirectAfterLogin') || '/dashboard';
-      navigate(redirectPath);
+    // Si l'authentification a réussi et que l'utilisateur est authentifié
+    if (authSuccess && isAuthenticated) {
+      // Récupérer l'URL de retour stockée ou utiliser une valeur par défaut
+      const returnUrl = localStorage.getItem('returnUrl') || '/dashboard';
+      
+      // Nettoyer l'URL de retour
+      localStorage.removeItem('returnUrl');
+      
+      // Utiliser un délai pour éviter les erreurs de navigation
+      const redirectTimer = setTimeout(() => {
+        navigate(returnUrl);
+      }, 300);
+      
+      // Nettoyer le timer lors du démontage du composant
+      return () => clearTimeout(redirectTimer);
     }
-  }, [isAuthenticated, navigate]);
+  }, [authSuccess, isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,6 +53,7 @@ const LoginSignup = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    setAuthSuccess(false);
 
     // Validation côté client
     if (!isLogin) {
@@ -71,20 +85,13 @@ const LoginSignup = () => {
       }
 
       if (result.success) {
-        // Redirection conditionnelle basée sur le rôle de l'utilisateur
+        // Stocker une indication de connexion réussie
         localStorage.setItem('justLoggedIn', 'true');
         
-        // Récupérer les informations de l'utilisateur connecté
-        const user = JSON.parse(localStorage.getItem('user'));
+        // Marquer l'authentification comme réussie pour déclencher la redirection
+        setAuthSuccess(true);
         
-        // Rediriger vers le tableau de bord approprié
-        if (user && (user.role === 'admin' || user.isAdmin === true)) {
-          console.log("Redirecting to admin dashboard");
-          navigate('/admin-dashboard');
-        } else {
-          console.log("Redirecting to user dashboard");
-          navigate('/dashboard');
-        }
+        console.log("Authentification réussie, redirection en cours...");
       } else {
         setError(result.message);
       }
@@ -210,7 +217,7 @@ const LoginSignup = () => {
           
           {error && <div className="error-message">{error}</div>}
           
-          <button type="submit" className="submit-btn" disabled={loading}>
+          <button type="submit" className="submit-btn" disabled={loading || authSuccess}>
             {isLogin ? 'Log In' : 'Sign Up'}
             {loading && ' ...'}
           </button>

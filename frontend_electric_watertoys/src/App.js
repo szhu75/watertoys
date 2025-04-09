@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext'; // Importez le AuthProvider
 import Home from './components/JS/Home';
 import Contact from './components/JS/Contact';
@@ -17,13 +17,19 @@ import PrivateRoute from './components/utils/PrivateRoute';
 // Composant de redirection basé sur le rôle
 const RoleBasedRedirect = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   
-  // Vérifier si l'utilisateur est admin
-  if (currentUser && (currentUser.role === 'admin' || currentUser.isAdmin === true)) {
-    return <Navigate to="/admin-dashboard" />;
-  } else {
-    return <Navigate to="/dashboard" />;
-  }
+  React.useEffect(() => {
+    // Vérifier si l'utilisateur est admin
+    if (currentUser && (currentUser.role === 'admin' || currentUser.isAdmin === true)) {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  }, [currentUser, navigate]);
+  
+  // Retourner null au lieu d'un composant Navigate
+  return null;
 };
 
 function App() {
