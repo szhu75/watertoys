@@ -132,71 +132,6 @@ const AdminDashboard = () => {
     }
   }, []);
 
-  // Fonction de débogage pour les commandes
-  const debugOrders = () => {
-    console.log("Statut de loading:", loading);
-    console.log("Erreur:", error);
-    console.log("Tableau des commandes:", orders);
-    console.log("Utilisateur actuel:", user);
-    console.log("Est admin?", user.isAdmin);
-    
-    // Tester l'API directement
-    const token = localStorage.getItem('token');
-    console.log("Token actuel:", token);
-    
-    // Essayer explicitement la route de débogage
-    axios.get('http://localhost:5000/api/orders/debug/all', {
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(response => {
-      console.log('TEST API - Commandes récupérées:', response.data);
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        setOrders(response.data);
-      } else {
-        console.log("Aucune commande trouvée via débogage");
-        
-        // Utiliser des données de test si nécessaire
-        const testOrders = [{
-          id: 336398,
-          user: {
-            firstName: 'Clément',
-            lastName: 'Bounadi',
-            email: 'test123@gmail.com'
-          },
-          totalAmount: 4199.99,
-          status: 'pending',
-          orderDate: '2025-04-07'
-        }];
-        
-        console.log('Données de test utilisées:', testOrders);
-        setOrders(testOrders);
-      }
-    })
-    .catch(err => {
-      console.error('TEST API - Erreur route debug:', err.response ? err.response.data : err.message);
-      
-      // Si la route de débogage échoue, essayer la route principale
-      axios.get('http://localhost:5000/api/orders', {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => {
-        console.log('TEST API (route principale) - Commandes récupérées:', response.data);
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          setOrders(response.data);
-        }
-      })
-      .catch(mainErr => {
-        console.error('TEST API - Erreur route principale:', mainErr.response ? mainErr.response.data : mainErr.message);
-      });
-    });
-  };
-
   // Récupérer les commandes - version améliorée
 // Section à remplacer dans AdminDashboard.js pour la gestion des commandes
 const fetchOrders = useCallback(async () => {
@@ -1016,7 +951,7 @@ const fetchOrders = useCallback(async () => {
         onClick={fetchOrders}
         disabled={loading}
       >
-        ↻ Actualiser les commandes
+        Actualiser les commandes
       </button>
     </div>
 

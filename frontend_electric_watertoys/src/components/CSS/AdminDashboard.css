@@ -771,3 +771,385 @@ h3 {
 .current-image img:hover {
   transform: scale(1.05);
 }
+
+/* Styles améliorés pour la gestion des commandes dans AdminDashboard */
+
+/* Section principale de gestion des commandes */
+.orders-management {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 25px;
+  width: 100%;
+  margin-bottom: 30px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.orders-management:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.orders-management h2 {
+  color: #172967;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+  position: relative;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.orders-management h2::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 80px;
+  height: 3px;
+  background-color: #172967;
+  border-radius: 10px;
+}
+
+/* En-tête de section avec bouton d'actualisation */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.refresh-btn {
+  background-color: #f0f4ff;
+  color: #172967;
+  border: 1px solid #dbe4ff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.refresh-btn::before {
+  content: "↻";
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.refresh-btn:hover {
+  background-color: #172967;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(23, 41, 103, 0.2);
+}
+
+.refresh-btn:disabled {
+  background-color: #f5f5f5;
+  color: #aaa;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Tableau des commandes */
+.orders-table-container {
+  overflow-x: auto;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0;
+}
+
+.orders-table th {
+  background-color: #f8f9fa;
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #eee;
+  white-space: nowrap;
+}
+
+.orders-table th:first-child {
+  border-top-left-radius: 10px;
+  padding-left: 20px;
+}
+
+.orders-table th:last-child {
+  border-top-right-radius: 10px;
+  padding-right: 20px;
+}
+
+.orders-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+  vertical-align: middle;
+}
+
+.orders-table td:first-child {
+  padding-left: 20px;
+  font-weight: 600;
+}
+
+.orders-table td:last-child {
+  padding-right: 20px;
+}
+
+.orders-table tr:last-child td {
+  border-bottom: none;
+}
+
+.orders-table tr:hover {
+  background-color: #f9faff;
+}
+
+/* Affichage des informations client */
+.orders-table td div {
+  margin-bottom: 3px;
+}
+
+.orders-table td small {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* Badges de statut */
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-width: 100px;
+  text-align: center;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.status-processing {
+  background-color: #cce5ff;
+  color: #004085;
+  border: 1px solid #b8daff;
+}
+
+.status-shipped {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.status-delivered {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Sélecteur de statut */
+.status-select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #333;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.3s;
+  width: 140px;
+  margin-top: 8px;
+}
+
+.status-select:focus {
+  border-color: #172967;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(23, 41, 103, 0.1);
+}
+
+/* Boutons d'action */
+.view-btn {
+  background-color: #172967;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.85rem;
+  display: inline-block;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.view-btn:hover {
+  background-color: #0b1a4d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(23, 41, 103, 0.2);
+}
+
+/* États de chargement et d'erreur */
+.loading-indicator {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 25px;
+  border-left: 4px solid #4caf50;
+  animation: pulse 2s infinite;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.loading-indicator::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 2px solid #2e7d32;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #f44336;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.error-message button {
+  background-color: #c62828;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 0.9rem;
+}
+
+.error-message button:hover {
+  background-color: #b71c1c;
+}
+
+/* Message lorsqu'il n'y a pas de commandes */
+.empty-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #757575;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px dashed #ddd;
+  margin: 15px 0;
+}
+
+.empty-message p {
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.empty-message .small-text {
+  font-size: 0.9rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Media queries pour responsivité */
+@media (max-width: 992px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .refresh-btn {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .orders-management {
+    padding: 15px;
+  }
+  
+  .orders-table {
+    min-width: 800px;
+  }
+  
+  .orders-management h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .status-badge {
+    min-width: 80px;
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .orders-management {
+    padding: 10px;
+  }
+  
+  .status-select {
+    width: 100%;
+  }
+  
+  .view-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}

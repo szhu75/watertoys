@@ -10,7 +10,6 @@ const ConfirmationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isProcessing, setIsProcessing] = useState(true);
-  const [orderCreated, setOrderCreated] = useState(false);
   const [error, setError] = useState(null);
   
   // Récupérer les détails de la commande depuis l'état de navigation avec useMemo
@@ -73,7 +72,6 @@ const ConfirmationPage = () => {
         localStorage.setItem('cartCleared', 'true');
         localStorage.setItem('newOrderId', response.data.order.id);
         localStorage.setItem('orderJustCreated', 'true');
-        setOrderCreated(true);
       } catch (error) {
         console.error("Erreur lors de la création de la commande:", error);
         if (error.response) {
@@ -120,7 +118,6 @@ const ConfirmationPage = () => {
         // Vider le panier (simulé)
         localStorage.setItem('cartCleared', 'true');
         
-        setOrderCreated(true);
         console.log("Commande simulée créée avec succès", newOrder);
       } catch (error) {
         console.error("Erreur lors de la simulation de commande:", error);

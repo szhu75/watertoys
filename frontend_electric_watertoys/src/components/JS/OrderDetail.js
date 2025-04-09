@@ -145,7 +145,7 @@ const OrderDetail = () => {
       <div className="order-detail-container">
         <div className="back-button">
           <button onClick={() => navigate(isAdmin() ? '/admin-dashboard' : '/dashboard')}>
-            ← Retour au tableau de bord
+            Retour au tableau de bord
           </button>
         </div>
         
