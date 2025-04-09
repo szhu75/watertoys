@@ -17,9 +17,7 @@ exports.createOrder = async (req, res) => {
   try {
     // Récupérer l'utilisateur
     const user = await User.findByPk(req.user.id);
-    
-    // Utilisez une adresse par défaut si l'utilisateur n'en a pas
-    // Et si elle est fournie dans la requête, utilisez-la
+
     const shippingAddress = user.address || req.body.shippingAddress || "Adresse non spécifiée";
     
     // Récupérer le panier avec ses produits
@@ -31,15 +29,53 @@ exports.createOrder = async (req, res) => {
         include: [{ model: Product, as: 'product' }]
       }],
       transaction,
-      lock: transaction.LOCK.UPDATE  // Ajout du verrouillage
+      lock: transaction.LOCK.UPDATE
     });
-    
     
     if (!cart || !cart.items || cart.items.length === 0) {
       await transaction.rollback();
       return res.status(400).json({ message: "Votre panier est vide" });
     }
-    
+
+        // Vérifier s'il existe déjà une commande récente (moins de 1 minute) avec le même contenu
+        const recentOrder = await Order.findOne({
+          where: {
+            userId: req.user.id,
+            createdAt: {
+              [db.Sequelize.Op.gt]: new Date(new Date() - 60 * 1000) // Moins d'une minute
+            }
+          },
+          include: [{
+            model: OrderItem,
+            as: 'items'
+          }],
+          transaction
+        });
+        
+        if (recentOrder) {
+          // Comparer le contenu du panier avec la commande récente
+          const cartItems = cart.items.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity
+          })).sort((a, b) => a.productId - b.productId);
+          
+          const orderItems = recentOrder.items.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity
+          })).sort((a, b) => a.productId - b.productId);
+          
+          const cartSignature = JSON.stringify(cartItems);
+          const orderSignature = JSON.stringify(orderItems);
+          
+          if (cartSignature === orderSignature) {
+            await transaction.rollback();
+            return res.status(200).json({
+              message: "Commande similaire déjà existante",
+              order: recentOrder
+            });
+          }
+        }
+
     // Calculer le montant total
     let totalAmount = 0;
     

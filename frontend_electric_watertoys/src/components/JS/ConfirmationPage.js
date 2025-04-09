@@ -51,12 +51,15 @@ const ConfirmationPage = () => {
           setIsProcessing(false);
           return;
         }
+
+        const requestData = {
+          paymentMethod: paymentMethod
+        };
+        console.log("Envoi de données au serveur:", requestData);
         
         const response = await axios.post(
           'http://localhost:5000/api/orders',
-          {
-            paymentMethod: paymentMethod
-          },
+          requestData,
           {
             headers: { 
               'Authorization': `Bearer ${token}`,
@@ -65,6 +68,7 @@ const ConfirmationPage = () => {
           }
         );
         
+        console.log("Réponse du serveur:", response.data);
         console.log("Commande créée avec succès:", response.data);
         localStorage.setItem('cartCleared', 'true');
         localStorage.setItem('newOrderId', response.data.order.id);
@@ -72,8 +76,9 @@ const ConfirmationPage = () => {
         setOrderCreated(true);
       } catch (error) {
         console.error("Erreur lors de la création de la commande:", error);
-        setError("Erreur lors de la création de la commande. " + 
-                (error.response?.data?.message || error.message));
+        if (error.response) {
+          console.error("Détails de l'erreur:", error.response.data);
+        }
         
         // Si la commande échoue côté serveur, créer une commande simulée comme solution de secours
         simulateOrder();

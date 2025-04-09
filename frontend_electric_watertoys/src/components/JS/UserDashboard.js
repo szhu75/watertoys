@@ -36,6 +36,56 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Dans UserDashboard.js
+
+// Ajouter cette fonction pour vérifier les doublons avant de supprimer
+const findAndDeleteAllDuplicates = useCallback(async (originalOrderId) => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    
+    // Trouver la commande originale
+    const originalOrder = orders.find(order => order.id.toString() === originalOrderId.toString());
+    if (!originalOrder) {
+      setError("Commande introuvable");
+      return false;
+    }
+    
+    // Créer une signature unique pour cette commande
+    const signature = generateOrderSignature(originalOrder);
+    
+    // Trouver toutes les commandes avec la même signature
+    const duplicates = orders.filter(order => 
+      order.id.toString() !== originalOrderId.toString() && 
+      generateOrderSignature(order) === signature
+    );
+    
+    console.log(`${duplicates.length} doublons trouvés pour la commande ${originalOrderId}`);
+    
+    // Supprimer tous les doublons
+    for (const duplicate of duplicates) {
+      try {
+        await axios.delete(`http://localhost:5000/api/orders/${duplicate.id}`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(`Commande dupliquée ${duplicate.id} supprimée avec succès`);
+      } catch (err) {
+        console.error(`Erreur lors de la suppression du doublon ${duplicate.id}:`, err);
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Erreur lors de la recherche et suppression des doublons:", error);
+    return false;
+  } finally {
+    setLoading(false);
+  }
+}, [orders]);
+
   // Récupérer le panier de l'utilisateur
   const fetchCart = useCallback(async () => {
     try {
@@ -124,62 +174,65 @@ const UserDashboard = () => {
   }, []);
 
   // Supprimer une commande réelle et ses doublons basés sur la signature
-  const deleteRealOrder = useCallback(async (orderId) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.")) {
-      try {
-        setLoading(true);
-        setError(null);
-        const token = localStorage.getItem('token');
+const deleteRealOrder = useCallback(async (orderId) => {
+  if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.")) {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
 
-        // Récupérer l'objet commande à supprimer pour obtenir sa signature
-        const orderToDelete = orders.find(o => o.id.toString() === orderId.toString());
-        if (!orderToDelete) {
-          alert("Commande introuvable.");
-          return;
-        }
-        const signature = generateOrderSignature(orderToDelete);
-        
-        // Trouver tous les enregistrements ayant la même signature (les doublons)
-        const duplicateOrders = orders.filter(o => generateOrderSignature(o) === signature);
-        
-        // Supprimer chaque enregistrement via l'API
-        for (const order of duplicateOrders) {
-          try {
-            await axios.delete(`http://localhost:5000/api/orders/${order.id}`, {
-              headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            });
-          } catch (err) {
-            console.error(`Erreur lors de la suppression de la commande id ${order.id}:`, err);
-            // Vous pouvez choisir de stopper ou continuer la suppression des autres doublons
-          }
-        }
-        
-        // Mise à jour de la liste des commandes
-        await fetchOrders();
-        alert('Commande et ses doublons supprimées avec succès!');
-      } catch (error) {
-        console.error('Erreur lors de la suppression de la commande:', error);
-        
-        let errorMessage = 'Erreur lors de la suppression de la commande.';
-        if (error.response) {
-          if (error.response.status === 404) {
-            errorMessage = 'Cette commande n\'existe pas ou ne peut plus être supprimée.';
-          } else if (error.response.status === 403) {
-            errorMessage = 'Vous n\'êtes pas autorisé à supprimer cette commande.';
-          } else if (error.response.data && error.response.data.message) {
-            errorMessage = error.response.data.message;
-          }
-        }
-        setError(errorMessage);
-        alert(errorMessage);
-      } finally {
-        setLoading(false);
+      // Récupérer l'objet commande à supprimer
+      const orderToDelete = orders.find(o => o.id.toString() === orderId.toString());
+      if (!orderToDelete) {
+        alert("Commande introuvable.");
+        return;
       }
+      
+      // Trouver tous les doublons de cette commande
+      const signature = generateOrderSignature(orderToDelete);
+      const duplicates = orders.filter(o => 
+        generateOrderSignature(o) === signature
+      );
+      
+      console.log(`Suppression de la commande ${orderId} et de ses ${duplicates.length - 1} doublons.`);
+      
+      // Supprimer tous les doublons y compris l'original
+      let successCount = 0;
+      for (const order of duplicates) {
+        try {
+          await axios.delete(`http://localhost:5000/api/orders/${order.id}`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          successCount++;
+        } catch (err) {
+          console.error(`Erreur lors de la suppression de la commande id ${order.id}:`, err);
+          
+          // Si c'est l'original qui a échoué, afficher une erreur spécifique
+          if (order.id.toString() === orderId.toString()) {
+            setError(`Impossible de supprimer la commande principale (ID: ${orderId})`);
+          }
+        }
+      }
+      
+      // Rafraîchir la liste des commandes
+      await fetchOrders();
+      
+      if (successCount > 0) {
+        alert(`${successCount} commande(s) supprimée(s) avec succès!`);
+      } else {
+        setError("Aucune commande n'a pu être supprimée.");
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la commande:', error);
+      setError('Erreur lors de la suppression de la commande.');
+    } finally {
+      setLoading(false);
     }
-  }, [fetchOrders, orders]);
+  }
+}, [fetchOrders, orders]);
 
   // Supprimer un article du panier
   const removeFromCart = useCallback(async (itemId) => {
