@@ -388,32 +388,44 @@ const fetchOrders = useCallback(async () => {
   const addProduct = useCallback(async (productData) => {
     setLoading(true);
     try {
-      // Créer un FormData pour pouvoir envoyer le fichier image
+      console.log("Données du produit à ajouter:", productData);
+      
       const formData = new FormData();
-      Object.keys(productData).forEach(key => {
-        if (key === 'image' && productData[key]) {
-          formData.append('image', productData[key]);
-        } else if (key !== 'image') {
-          formData.append(key, productData[key]);
+      formData.append('name', productData.name);
+      formData.append('description', productData.description || '');
+      formData.append('price', productData.price.toString());
+      formData.append('stock', productData.stock.toString());
+      formData.append('categoryId', productData.categoryId.toString());
+      
+      // Ajouter l'image seulement si elle existe
+      if (productData.image instanceof File) {
+        formData.append('image', productData.image);
+        console.log("Image ajoutée:", productData.image.name);
+      }
+  
+      // Debug du FormData
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+      }
+  
+      const response = await axios({
+        method: 'post',
+        url: 'http://localhost:5000/api/products',
+        data: formData,
+        headers: {
+          'Authorization': `Bearer ${getToken()}`,
+          'Content-Type': 'multipart/form-data'
         }
       });
-
-      const response = await axios.post(
-        'http://localhost:5000/api/products',
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${getToken()}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
       
       console.log('Produit ajouté:', response.data);
-      fetchProducts(); // Rafraîchir la liste des produits
+      fetchProducts();
       return { success: true, data: response.data };
     } catch (err) {
       console.error('Erreur lors de l\'ajout du produit:', err);
+      if (err.response && err.response.data) {
+        console.error('Détails de l\'erreur:', err.response.data);
+      }
       setError('Impossible d\'ajouter le produit. Veuillez réessayer.');
       return { success: false, error: err.response?.data?.message || 'Erreur lors de l\'ajout du produit' };
     } finally {
@@ -422,41 +434,49 @@ const fetchOrders = useCallback(async () => {
   }, [fetchProducts, getToken]);
 
   // Mettre à jour un produit
-  const updateProduct = useCallback(async (productId, productData) => {
+  const updateProduct = async (productId, productData) => {
     setLoading(true);
     try {
-      // Créer un FormData pour pouvoir envoyer le fichier image
+      console.log("Mise à jour du produit ID:", productId);
+      console.log("Données à envoyer:", productData);
+      
       const formData = new FormData();
-      Object.keys(productData).forEach(key => {
-        if (key === 'image' && productData[key]) {
-          formData.append('image', productData[key]);
-        } else if (key !== 'image') {
-          formData.append(key, productData[key]);
+      formData.append('name', productData.name);
+      formData.append('description', productData.description || '');
+      formData.append('price', productData.price.toString());
+      formData.append('stock', productData.stock.toString());
+      formData.append('categoryId', productData.categoryId.toString());
+      
+      if (productData.image instanceof File) {
+        formData.append('image', productData.image);
+        console.log("Image ajoutée pour mise à jour:", productData.image.name);
+      }
+  
+      // Utilisation de l'API Axios avec une configuration plus explicite
+      const response = await axios({
+        method: 'put',
+        url: `http://localhost:5000/api/products/${productId}`,
+        data: formData,
+        headers: {
+          'Authorization': `Bearer ${getToken()}`,
+          'Content-Type': 'multipart/form-data'
         }
       });
-
-      const response = await axios.put(
-        `http://localhost:5000/api/products/${productId}`,
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${getToken()}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
       
       console.log('Produit mis à jour:', response.data);
-      fetchProducts(); // Rafraîchir la liste des produits
+      fetchProducts();
       return { success: true, data: response.data };
     } catch (err) {
       console.error('Erreur lors de la mise à jour du produit:', err);
+      if (err.response && err.response.data) {
+        console.error('Détails de l\'erreur:', err.response.data);
+      }
       setError('Impossible de mettre à jour le produit. Veuillez réessayer.');
       return { success: false, error: err.response?.data?.message || 'Erreur lors de la mise à jour du produit' };
     } finally {
       setLoading(false);
     }
-  }, [fetchProducts, getToken]);
+  };
 
   // Mettre à jour le statut d'une commande
   const handleUpdateOrderStatus = useCallback(async (orderId, status) => {

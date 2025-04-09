@@ -59,10 +59,6 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: true,
       validate: {
-        isUrl: {
-          args: true,
-          msg: "L'URL de l'image n'est pas valide"
-        }
       }
     },
     categoryId: {

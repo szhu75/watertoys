@@ -8,12 +8,15 @@ const fs = require('fs');
 // Configuration du stockage des images
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Assurez-vous que ce chemin correspond à votre structure de projet
-    const uploadDir = path.join(__dirname, '../../frontend_electric_watertoys/public/images');
+    // Utilisez directement le dossier images existant
+    const uploadDir = path.join(__dirname, '../../../frontend_electric_watertoys/public/images');
     
-    // Créer le dossier s'il n'existe pas
+    // Vérifiez si le dossier existe
     if (!fs.existsSync(uploadDir)){
+      console.error("Le dossier d'upload n'existe pas:", uploadDir);
       fs.mkdirSync(uploadDir, { recursive: true });
+    } else {
+      console.log("Dossier d'upload trouvé:", uploadDir);
     }
     cb(null, uploadDir);
   },
@@ -82,17 +85,29 @@ exports.getTrashedProducts = async (req, res) => {
 
 // Créer un nouveau produit
 exports.createProduct = async (req, res) => {
-  try {
+    try {
     upload.single('image')(req, res, async (err) => {
       if (err) {
+        console.error('Erreur multer:', err);
         return res.status(400).json({ message: err.message });
       }
+
+      console.log('Données reçues dans le corps:', req.body);
+      console.log('Fichier reçu:', req.file);
 
       const { name, description, price, stock, categoryId } = req.body;
       
       // Validation de base
       if (!name || !price || !stock || !categoryId) {
-        return res.status(400).json({ message: "Tous les champs sont requis" });
+        return res.status(400).json({ 
+          message: "Tous les champs sont requis",
+          missing: {
+            name: !name,
+            price: !price,
+            stock: !stock,
+            categoryId: !categoryId
+          }
+        });
       }
 
       // Construire l'objet produit
@@ -107,7 +122,7 @@ exports.createProduct = async (req, res) => {
 
       // Ajouter le chemin de l'image si un fichier a été uploadé
       if (req.file) {
-        productData.imageUrl = `/images/products/${req.file.filename}`;
+        productData.imageUrl = `/images/${req.file.filename}`;
       }
 
       try {
@@ -161,18 +176,7 @@ exports.updateProduct = async (req, res) => {
 
       // Gérer le téléchargement d'image
       if (req.file) {
-        // Supprimer l'ancienne image si elle existe
-        if (product.imageUrl) {
-          const oldImagePath = path.join(__dirname, '../../frontend_electric_watertoys/public/images', product.imageUrl);
-          if (fs.existsSync(oldImagePath)) {
-            try {
-              fs.unlinkSync(oldImagePath);
-            } catch (unlinkError) {
-              console.warn('Impossible de supprimer l\'ancienne image:', unlinkError);
-            }
-          }
-        }
-        updateData.imageUrl = `/images/products/${req.file.filename}`;
+        updateData.imageUrl = `/images/${req.file.filename}`;
       }
 
       try {

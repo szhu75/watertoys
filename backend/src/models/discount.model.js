@@ -7,8 +7,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       code: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
       },
       amount: {
         type: Sequelize.DECIMAL(10, 2),
