@@ -6,6 +6,7 @@ import Header from './Header';
 import Footer from './Footer';
 import '../CSS/ConfirmationPage.css';
 
+
 const ConfirmationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();

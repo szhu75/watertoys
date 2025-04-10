@@ -36,56 +36,6 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Dans UserDashboard.js
-
-// Ajouter cette fonction pour vérifier les doublons avant de supprimer
-const findAndDeleteAllDuplicates = useCallback(async (originalOrderId) => {
-  try {
-    setLoading(true);
-    const token = localStorage.getItem('token');
-    
-    // Trouver la commande originale
-    const originalOrder = orders.find(order => order.id.toString() === originalOrderId.toString());
-    if (!originalOrder) {
-      setError("Commande introuvable");
-      return false;
-    }
-    
-    // Créer une signature unique pour cette commande
-    const signature = generateOrderSignature(originalOrder);
-    
-    // Trouver toutes les commandes avec la même signature
-    const duplicates = orders.filter(order => 
-      order.id.toString() !== originalOrderId.toString() && 
-      generateOrderSignature(order) === signature
-    );
-    
-    console.log(`${duplicates.length} doublons trouvés pour la commande ${originalOrderId}`);
-    
-    // Supprimer tous les doublons
-    for (const duplicate of duplicates) {
-      try {
-        await axios.delete(`http://localhost:5000/api/orders/${duplicate.id}`, {
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        console.log(`Commande dupliquée ${duplicate.id} supprimée avec succès`);
-      } catch (err) {
-        console.error(`Erreur lors de la suppression du doublon ${duplicate.id}:`, err);
-      }
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Erreur lors de la recherche et suppression des doublons:", error);
-    return false;
-  } finally {
-    setLoading(false);
-  }
-}, [orders]);
-
   // Récupérer le panier de l'utilisateur
   const fetchCart = useCallback(async () => {
     try {
