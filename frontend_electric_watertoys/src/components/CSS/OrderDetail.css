@@ -271,7 +271,7 @@
   border: 1px solid #f5c6cb;
 }
 
-/* États de chargement et d'erreur */
+/* États de chargement et d'erreur
 .loading {
   display: flex;
   justify-content: center;
@@ -299,7 +299,7 @@
   border-top: 4px solid #172967;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-}
+} */
 
 .error {
   text-align: center;
