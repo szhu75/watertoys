@@ -9,7 +9,7 @@ import '../CSS/AdminDashboard.css';
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('profile');
-  
+
   // États pour gérer les données
   const [products, setProducts] = useState([]);
   const [trashedProducts, setTrashedProducts] = useState([]);
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
 
   // États pour le mode édition
   const [editingProduct, setEditingProduct] = useState(null);
-  
+
   // Récupérer les informations de l'utilisateur
   const [user, setUser] = useState({});
 
@@ -42,46 +42,46 @@ const AdminDashboard = () => {
   const validateAdminToken = () => {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    
-    console.log("Validation du token administrateur:");
-    console.log("Token présent:", !!token);
-    console.log("Utilisateur:", user);
-    console.log("Est admin selon localStorage:", user.isAdmin === true || user.role === 'admin');
-    
+
+    console.log("Validation of the administrator token:");
+    console.log("Token present:", !!token);
+    console.log("User", user);
+    console.log("Is admin according to localStorage :", user.isAdmin === true || user.role === 'admin');
+
     if (!token) {
-      console.error("Token manquant - Déconnexion nécessaire");
+      console.error("Missing Token - Logout Required");
       return false;
     }
-    
+
     try {
       // Décoder manuellement le token pour vérifier (ne pas utiliser en production)
       const tokenParts = token.split('.');
       if (tokenParts.length !== 3) {
-        console.error("Format de token invalide");
+        console.error("Invalid token format");
         return false;
       }
-      
+
       const decodedBase64 = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
       const decodedStr = atob(decodedBase64);
       const payload = JSON.parse(decodedStr);
-      
-      console.log("Payload du token:", payload);
-      console.log("Le token contient isAdmin:", payload.isAdmin === true);
-      console.log("Le token contient le rôle admin:", payload.role === 'admin');
-      
+
+      console.log("Token payload:", payload);
+      console.log("Token contains isAdmin:", payload.isAdmin === true);
+      console.log("Token contains admin role:", payload.role === 'admin');
+
       return payload.isAdmin === true || payload.role === 'admin';
     } catch (err) {
-      console.error("Erreur lors du décodage du token:", err);
+      console.error("Error decoding token:", err);
       return false;
     }
   };
 
   // Fonction pour récupérer le token JWT - mémorisée pour éviter les recréations à chaque rendu
   const getToken = useCallback(() => localStorage.getItem('token'), []);
-  
+
   // Configuration des headers pour les requêtes API
   const getAuthHeaders = useCallback(() => ({
-    headers: { 
+    headers: {
       Authorization: `Bearer ${getToken()}`,
       'Content-Type': 'application/json'
     }
@@ -92,12 +92,12 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const response = await axios.get('http://localhost:5000/api/products', getAuthHeaders());
-      console.log('Produits actifs récupérés:', response.data);
+      console.log('Active products retrieved:', response.data);
       setProducts(response.data);
       setError(null);
     } catch (err) {
-      console.error('Erreur lors de la récupération des produits:', err);
-      setError('Impossible de récupérer les produits. Veuillez réessayer.');
+      console.error('Error retrieving products:', err);
+      setError('Unable to retrieve products. Please try again.');
       setProducts([]);
     } finally {
       setLoading(false);
@@ -109,12 +109,12 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const response = await axios.get('http://localhost:5000/api/products/trash/all', getAuthHeaders());
-      console.log('Produits dans la corbeille récupérés:', response.data);
+      console.log('Trashed Products Recovered:', response.data);
       setTrashedProducts(response.data);
       setError(null);
     } catch (err) {
-      console.error('Erreur lors de la récupération des produits supprimés:', err);
-      setError('Impossible de récupérer les produits supprimés. Veuillez réessayer.');
+      console.error('Error retrieving deleted products:', err);
+      setError('Unable to retrieve deleted products. Please try again.');
       setTrashedProducts([]);
     } finally {
       setLoading(false);
@@ -125,65 +125,65 @@ const AdminDashboard = () => {
   const fetchCategories = useCallback(async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/products/categories/all');
-      console.log('Catégories récupérées:', response.data);
+      console.log('Categories retrieved:', response.data);
       setCategories(response.data);
     } catch (err) {
-      console.error('Erreur lors de la récupération des catégories:', err);
+      console.error('Error retrieving categories:', err);
     }
   }, []);
 
   // Récupérer les commandes - version améliorée
-// Section à remplacer dans AdminDashboard.js pour la gestion des commandes
-const fetchOrders = useCallback(async () => {
-  setLoading(true);
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError("Token manquant. Veuillez vous reconnecter.");
-      setLoading(false);
-      return;
-    }
-
-    // Utiliser la route principale pour les admins
-    const response = await axios.get('http://localhost:5000/api/orders', {
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+  // Section à remplacer dans AdminDashboard.js pour la gestion des commandes
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError("Missing token. Please log in again.");
+        setLoading(false);
+        return;
       }
-    });
 
-    console.log('Commandes récupérées avec succès:', response.data);
-    
-    if (Array.isArray(response.data)) {
-      setOrders(response.data);
-      setError(null);
-    } else {
-      console.error("Format de données invalide:", response.data);
-      setError("Format de données invalide reçu du serveur");
+      // Utiliser la route principale pour les admins
+      const response = await axios.get('http://localhost:5000/api/orders', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Orders successfully retrieved:', response.data);
+
+      if (Array.isArray(response.data)) {
+        setOrders(response.data);
+        setError(null);
+      } else {
+        console.error("Invalid data format:", response.data);
+        setError("Invalid data format received from server");
+      }
+    } catch (error) {
+      console.error('Error retrieving commands:', error);
+      const errorMsg = error.response
+        ? `Error: ${error.response.status} - ${error.response.data.message || 'Server error'}`
+        : "The server is not responding. Check your connection.";
+
+      setError(errorMsg);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Erreur lors de la récupération des commandes:', error);
-    const errorMsg = error.response 
-      ? `Erreur: ${error.response.status} - ${error.response.data.message || 'Erreur serveur'}`
-      : "Le serveur ne répond pas. Vérifiez votre connexion.";
-    
-    setError(errorMsg);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  }, []);
 
   // Récupérer les utilisateurs
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get('http://localhost:5000/api/users', getAuthHeaders());
-      console.log('Utilisateurs récupérés:', response.data);
+      console.log('Users retrieved:', response.data);
       setUsers(Array.isArray(response.data) ? response.data : []);
       setError(null);
     } catch (err) {
-      console.error('Erreur lors de la récupération des utilisateurs:', err);
-      setError('Impossible de récupérer les utilisateurs. Veuillez réessayer.');
+      console.error('Error retrieving users:', err);
+      setError('Unable to retrieve users. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -191,41 +191,41 @@ const fetchOrders = useCallback(async () => {
 
   // Mettre un produit à la corbeille
   const trashProduct = useCallback(async (productId) => {
-    if (!window.confirm('Voulez-vous mettre ce produit à la corbeille ?')) {
+    if (!window.confirm('Do you want to move this product to the trash?')) {
       return { success: false };
     }
-    
+
     setLoading(true);
     try {
       // Trouver le produit pour pouvoir l'annuler rapidement
       const productToTrash = products.find(p => p.id === productId);
-      
+
       const response = await axios.put(
-        `http://localhost:5000/api/products/${productId}/trash`, 
-        {}, 
+        `http://localhost:5000/api/products/${productId}/trash`,
+        {},
         getAuthHeaders()
       );
-      
-      console.log('Produit mis à la corbeille:', response.data);
-      
+
+      console.log('Product moved to trash:', response.data);
+
       // Configuration pour l'annulation rapide
       setLastDeletedProduct(productToTrash);
       setShowUndoNotification(true);
-      
+
       // Masquer la notification après 10 secondes
       setTimeout(() => {
         setShowUndoNotification(false);
         setLastDeletedProduct(null);
       }, 10000);
-      
+
       // Rafraîchir les listes
       fetchProducts();
-      
+
       return { success: true };
     } catch (err) {
-      console.error('Erreur lors de la mise à la corbeille du produit:', err);
-      setError('Impossible de mettre le produit à la corbeille. Veuillez réessayer.');
-      return { success: false, error: err.response?.data?.message || 'Erreur lors de la mise à la corbeille' };
+      console.error('Error trashing product:', err);
+      setError('Unable to trash product. Please try again.');
+      return { success: false, error: err.response?.data?.message || 'Error trashing' };
     } finally {
       setLoading(false);
     }
@@ -236,23 +236,24 @@ const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/products/${productId}/restore`, 
-        {}, 
+        `http://localhost:5000/api/products/${productId}/restore`,
+        {},
         getAuthHeaders()
       );
-      
-      console.log('Produit restauré:', response.data);
-      
+
+      console.log('Product restored:', response.data);
+
       // Rafraîchir les deux listes
       fetchProducts();
       fetchTrashedProducts();
-      
+
       return { success: true };
     } catch (err) {
-      console.error('Erreur lors de la restauration du produit:', err);
-      setError('Impossible de restaurer le produit. Veuillez réessayer.');
-      return { success: false, error: err.response?.data?.message || 'Erreur lors de la restauration' };
+      console.error('Error restoring product:', err);
+      setError('Unable to restore the product. Please try again.');
+      return { success: false, error: err.response?.data?.message || 'Error restoring' };
     } finally {
+
       setLoading(false);
     }
   }, [fetchProducts, fetchTrashedProducts, getAuthHeaders]);
@@ -260,7 +261,7 @@ const fetchOrders = useCallback(async () => {
   // Annuler la dernière suppression
   const undoDelete = useCallback(() => {
     if (!lastDeletedProduct) return;
-    
+
     restoreProduct(lastDeletedProduct.id);
     setShowUndoNotification(false);
     setLastDeletedProduct(null);
@@ -268,27 +269,27 @@ const fetchOrders = useCallback(async () => {
 
   // Supprimer définitivement un produit
   const permanentlyDeleteProduct = useCallback(async (productId) => {
-    if (!window.confirm('ATTENTION: Cette action est irréversible. Voulez-vous supprimer définitivement ce produit ?')) {
+    if (!window.confirm('WARNING: This action is irreversible. Do you want to permanently delete this product?')) {
       return { success: false };
     }
-    
+
     setLoading(true);
     try {
       await axios.delete(
         `http://localhost:5000/api/products/${productId}`,
         getAuthHeaders()
       );
-      
-      console.log('Produit supprimé définitivement:', productId);
-      
+
+      console.log('Product permanently deleted:', productId);
+
       // Rafraîchir la liste des produits dans la corbeille
       fetchTrashedProducts();
-      
+
       return { success: true };
     } catch (err) {
-      console.error('Erreur lors de la suppression définitive du produit:', err);
-      setError('Impossible de supprimer définitivement le produit. Veuillez réessayer.');
-      return { success: false, error: err.response?.data?.message || 'Erreur lors de la suppression définitive' };
+      console.error('Error permanently deleting product:', err);
+      setError('Unable to permanently delete the product. Please try again.');
+      return { success: false, error: err.response?.data?.message || 'Error permanently deleting' };
     } finally {
       setLoading(false);
     }
@@ -296,24 +297,24 @@ const fetchOrders = useCallback(async () => {
 
   // Vider la corbeille
   const emptyTrash = useCallback(async () => {
-    if (!window.confirm('ATTENTION: Cette action est irréversible. Voulez-vous vider toute la corbeille ?')) {
+    if (!window.confirm('WARNING: This action is irreversible. Do you want to empty the entire Trash?')) {
       return { success: false };
     }
-    
+
     setLoading(true);
     try {
       const response = await axios.delete(
         'http://localhost:5000/api/products/trash/empty',
         getAuthHeaders()
       );
-      
-      console.log('Corbeille vidée:', response.data);
+
+      console.log('Trash emptied:', response.data);
       setTrashedProducts([]);
       return { success: true };
     } catch (err) {
-      console.error('Erreur lors du vidage de la corbeille:', err);
-      setError('Impossible de vider la corbeille. Veuillez réessayer.');
-      return { success: false, error: err.response?.data?.message || 'Erreur lors du vidage de la corbeille' };
+      console.error('Error emptying Trash:', err);
+      setError('Unable to empty Trash. Please try again.');
+      return { success: false, error: err.response?.data?.message || 'Error emptying Trash' };
     } finally {
       setLoading(false);
     }
@@ -323,26 +324,26 @@ const fetchOrders = useCallback(async () => {
   const addProduct = useCallback(async (productData) => {
     setLoading(true);
     try {
-      console.log("Données du produit à ajouter:", productData);
-      
+      console.log("Product data to add:", productData);
+
       const formData = new FormData();
       formData.append('name', productData.name);
       formData.append('description', productData.description || '');
       formData.append('price', productData.price.toString());
       formData.append('stock', productData.stock.toString());
       formData.append('categoryId', productData.categoryId.toString());
-      
+
       // Ajouter l'image seulement si elle existe
       if (productData.image instanceof File) {
         formData.append('image', productData.image);
-        console.log("Image ajoutée:", productData.image.name);
+        console.log("Image added:", productData.image.name);
       }
-  
+
       // Debug du FormData
       for (let pair of formData.entries()) {
         console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
       }
-  
+
       const response = await axios({
         method: 'post',
         url: 'http://localhost:5000/api/products',
@@ -352,17 +353,17 @@ const fetchOrders = useCallback(async () => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
-      console.log('Produit ajouté:', response.data);
+
+      console.log('Product added:', response.data);
       fetchProducts();
       return { success: true, data: response.data };
     } catch (err) {
-      console.error('Erreur lors de l\'ajout du produit:', err);
+      console.error('Error adding product:', err);
       if (err.response && err.response.data) {
-        console.error('Détails de l\'erreur:', err.response.data);
+        console.error('Error details:', err.response.data);
       }
-      setError('Impossible d\'ajouter le produit. Veuillez réessayer.');
-      return { success: false, error: err.response?.data?.message || 'Erreur lors de l\'ajout du produit' };
+      setError('Unable to add product. Please try again.');
+      return { success: false, error: err.response?.data?.message || 'Error adding product' };
     } finally {
       setLoading(false);
     }
@@ -372,21 +373,21 @@ const fetchOrders = useCallback(async () => {
   const updateProduct = async (productId, productData) => {
     setLoading(true);
     try {
-      console.log("Mise à jour du produit ID:", productId);
-      console.log("Données à envoyer:", productData);
-      
+      console.log("Updating product ID:", productId);
+      console.log("Data to send:", productData);
+
       const formData = new FormData();
       formData.append('name', productData.name);
       formData.append('description', productData.description || '');
       formData.append('price', productData.price.toString());
       formData.append('stock', productData.stock.toString());
       formData.append('categoryId', productData.categoryId.toString());
-      
+
       if (productData.image instanceof File) {
         formData.append('image', productData.image);
-        console.log("Image ajoutée pour mise à jour:", productData.image.name);
+        console.log("Image added for update:", productData.image.name);
       }
-  
+
       // Utilisation de l'API Axios avec une configuration plus explicite
       const response = await axios({
         method: 'put',
@@ -397,17 +398,17 @@ const fetchOrders = useCallback(async () => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
-      console.log('Produit mis à jour:', response.data);
+
+      console.log('Product updated:', response.data);
       fetchProducts();
       return { success: true, data: response.data };
     } catch (err) {
-      console.error('Erreur lors de la mise à jour du produit:', err);
+      console.error('Error updating product:', err);
       if (err.response && err.response.data) {
-        console.error('Détails de l\'erreur:', err.response.data);
+        console.error('Error details:', err.response.data);
       }
-      setError('Impossible de mettre à jour le produit. Veuillez réessayer.');
-      return { success: false, error: err.response?.data?.message || 'Erreur lors de la mise à jour du produit' };
+      setError('Unable to update product. Please try again.');
+      return { success: false, error: err.response?.data?.message || 'Error updating product' };
     } finally {
       setLoading(false);
     }
@@ -418,18 +419,18 @@ const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/orders/${orderId}/status`, 
+        `http://localhost:5000/api/orders/${orderId}/status`,
         { status },
         getAuthHeaders()
       );
-      
-      console.log('Statut de commande mis à jour:', response.data);
-      fetchOrders(); // Rafraîchir la liste des commandes
+
+      console.log('Order status updated:', response.data);
+      fetchOrders(); // Refresh the list of orders
       return { success: true };
     } catch (err) {
-      console.error('Erreur lors de la mise à jour du statut de la commande:', err);
-      setError('Impossible de mettre à jour le statut de la commande. Veuillez réessayer.');
-      return { success: false, error: err.response?.data?.message || 'Erreur lors de la mise à jour du statut' };
+      console.error('Error updating order status:', err);
+      setError('Unable to update order status. Please try again.');
+      return { success: false, error: err.response?.data?.message || 'Error updating status' };
     } finally {
       setLoading(false);
     }
@@ -450,13 +451,13 @@ const fetchOrders = useCallback(async () => {
       navigate('/dashboard');
       return;
     }
-    
+
     setUser(userInfo);
-    
+
     // Valider le token admin
     const isValidAdmin = validateAdminToken();
     console.log("Validation admin:", isValidAdmin);
-    
+
     // Charger les données initiales
     fetchProducts();
     fetchCategories();
@@ -467,7 +468,7 @@ const fetchOrders = useCallback(async () => {
   // Gestion des changements dans le formulaire de nouveau produit
   const handleNewProductChange = (e) => {
     const { name, value, files } = e.target;
-    
+
     if (name === 'image' && files && files[0]) {
       setNewProduct(prev => ({
         ...prev,
@@ -484,10 +485,10 @@ const fetchOrders = useCallback(async () => {
   // Ajouter ou mettre à jour un produit
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    
+
     // Validation de base
     if (!newProduct.name || !newProduct.price || !newProduct.stock || !newProduct.categoryId) {
-      alert('Veuillez remplir tous les champs obligatoires');
+      alert('Please fill in all required fields');
       return;
     }
 
@@ -498,7 +499,7 @@ const fetchOrders = useCallback(async () => {
     };
 
     let result;
-    
+
     // Mode édition ou ajout
     if (editingProduct) {
       // Mettre à jour un produit existant
@@ -520,7 +521,7 @@ const fetchOrders = useCallback(async () => {
       });
       setEditingProduct(null);
     } else {
-      alert(result.error || 'Une erreur est survenue');
+      alert(result.error || 'An error has occurred');
     }
   };
 
@@ -536,9 +537,9 @@ const fetchOrders = useCallback(async () => {
       description: product.description || '',
       imageUrl: product.imageUrl || ''
     };
-  
-    console.log('Produit à éditer:', safeProduct);
-  
+
+    console.log('Product to edit:', safeProduct);
+
     setEditingProduct(safeProduct);
     setNewProduct({
       name: safeProduct.name,
@@ -574,23 +575,13 @@ const fetchOrders = useCallback(async () => {
   const handleGoBack = () => {
     navigate('/');
   };
-  
+
   // Déconnexion
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     navigate('/');
   };
-
-  // // Fonction pour rafraîchir les données
-  // const refreshData = () => {
-  //   fetchProducts();
-  //   fetchOrders();
-  //   fetchUsers();
-  //   if (showTrash) {
-  //     fetchTrashedProducts();
-  //   }
-  // };
 
   // Basculer l'affichage de la corbeille
   const toggleTrashView = () => {
@@ -615,65 +606,65 @@ const fetchOrders = useCallback(async () => {
             <button className="back-btn" onClick={handleGoBack}>
               <i className="arrow-icon">←</i>
             </button>
-            <h1>Tableau de Bord Administrateur</h1>
+            <h1>Administrator Dashboard</h1>
           </div>
         </header>
 
         <div className="dashboard-layout">
           <div className="sidebar">
-            <h2>Menu Admin</h2>
+            <h2>Admin Menu</h2>
             <ul>
-              <li 
+              <li
                 className={activeSection === 'profile' ? 'active' : ''}
                 onClick={() => setActiveSection('profile')}
               >
-                Profil
+                Profile
               </li>
-              <li 
+              <li
                 className={activeSection === 'products' ? 'active' : ''}
                 onClick={() => setActiveSection('products')}
               >
-                Gestion Produits
+                Product Management
               </li>
-              <li 
+              <li
                 className={activeSection === 'orders' ? 'active' : ''}
                 onClick={() => setActiveSection('orders')}
               >
-                Gestion Commandes
+                Order Management
               </li>
-              <li 
+              <li
                 className={activeSection === 'users' ? 'active' : ''}
                 onClick={() => setActiveSection('users')}
               >
-                Utilisateurs
-            </li>
+                Users
+              </li>
               <li onClick={handleLogout}>
-                Déconnexion
+                Log out
               </li>
             </ul>
           </div>
 
           <div className="dashboard-content">
-            {loading && <div className="loading-indicator">Chargement en cours...</div>}
+            {loading && <div className="loading-indicator">Loading...</div>}
             {error && <div className="error-message">{error}</div>}
-            
+
             {/* Notification d'annulation */}
             {showUndoNotification && (
               <div className="undo-notification">
-                <span>Produit mis à la corbeille : {lastDeletedProduct?.name}</span>
-                <button onClick={undoDelete}>Annuler</button>
+                <span>Product moved to trash: {lastDeletedProduct?.name}</span>
+                <button onClick={undoDelete}>Undo</button>
               </div>
             )}
 
             {activeSection === 'profile' && (
               <div className="profile-section">
-                <h2>Mon Profil Administrateur</h2>
+                <h2>My Administrator Profile</h2>
                 <div className="profile-info">
-                  <p><strong>Nom:</strong> {user.lastName}</p>
-                  <p><strong>Prénom:</strong> {user.firstName}</p>
+                  <p><strong>Last Name:</strong> {user.lastName}</p>
+                  <p><strong>First Name:</strong> {user.firstName}</p>
                   <p><strong>Email:</strong> {user.email}</p>
-                  <p><strong>Rôle:</strong> Administrateur</p>
-              
+                  <p><strong>Role:</strong> Administrator</p>
+
                 </div>
               </div>
             )}
@@ -681,27 +672,27 @@ const fetchOrders = useCallback(async () => {
             {activeSection === 'products' && (
               <section className="products-management">
                 <div className="products-header">
-                  <h2>Gestion des Produits</h2>
-                  <button 
-                    className={`trash-toggle-btn ${showTrash ? 'active' : ''}`} 
+                  <h2>Product Management</h2>
+                  <button
+                    className={`trash-toggle-btn ${showTrash ? 'active' : ''}`}
                     onClick={toggleTrashView}
                   >
-                    {showTrash ? 'Produits actifs' : `Corbeille (${trashedProducts.length})`}
+                    {showTrash ? 'Active Products' : `Trash (${trashedProducts.length})`}
                   </button>
                 </div>
-                
+
                 {!showTrash ? (
                   <>
                     <form onSubmit={handleAddProduct} className="product-form">
-                      <h3>{editingProduct ? 'Modifier le Produit' : 'Ajouter un Produit'}</h3>
-                      
+                      <h3>{editingProduct ? 'Edit Product' : 'Add Product'}</h3>
+
                       <div className="form-row">
                         <input
                           type="text"
                           name="name"
                           value={newProduct.name}
                           onChange={handleNewProductChange}
-                          placeholder="Nom du Produit"
+                          placeholder="Product Name"
                           required
                         />
                         <input
@@ -709,13 +700,13 @@ const fetchOrders = useCallback(async () => {
                           name="price"
                           value={newProduct.price}
                           onChange={handleNewProductChange}
-                          placeholder="Prix"
+                          placeholder="Price"
                           required
                           step="0.01"
                           min="0"
                         />
                       </div>
-                      
+
                       <div className="form-row">
                         <input
                           type="number"
@@ -732,7 +723,7 @@ const fetchOrders = useCallback(async () => {
                           onChange={handleNewProductChange}
                           required
                         >
-                          <option value="">Sélectionner une catégorie</option>
+                          <option value="">Select a category</option>
                           {categories.map(category => (
                             <option key={category.id} value={category.id}>
                               {category.name}
@@ -740,15 +731,15 @@ const fetchOrders = useCallback(async () => {
                           ))}
                         </select>
                       </div>
-                      
+
                       <textarea
                         name="description"
                         value={newProduct.description}
                         onChange={handleNewProductChange}
-                        placeholder="Description du produit"
+                        placeholder="Product Description"
                         required
                       />
-                      
+
                       <div className="form-row">
                         <input
                           type="file"
@@ -758,11 +749,11 @@ const fetchOrders = useCallback(async () => {
                         />
                         {editingProduct && editingProduct.imageUrl && (
                           <div className="current-image">
-                            <span>Image actuelle:</span>
-                            <img 
-                              src={editingProduct.imageUrl} 
-                              alt={editingProduct.name} 
-                              width="100" 
+                            <span>Current image:</span>
+                            <img
+                              src={editingProduct.imageUrl}
+                              alt={editingProduct.name}
+                              width="100"
                             />
                           </div>
                         )}
@@ -770,12 +761,12 @@ const fetchOrders = useCallback(async () => {
 
                       <div className="form-actions">
                         <button type="submit" className="submit-btn" disabled={loading}>
-                          {editingProduct ? 'Mettre à jour' : 'Ajouter'}
+                          {editingProduct ? 'Update' : 'Add'}
                         </button>
-                        
+
                         {editingProduct && (
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             className="cancel-btn"
                             onClick={() => {
                               setEditingProduct(null);
@@ -789,33 +780,33 @@ const fetchOrders = useCallback(async () => {
                               });
                             }}
                           >
-                            Annuler
+                            Cancel
                           </button>
                         )}
                       </div>
                     </form>
 
                     <div className="product-list">
-                      <h3>Liste des Produits ({products.length})</h3>
+                      <h3>Product List ({products.length})</h3>
                       {products.length === 0 ? (
-                        <p className="empty-message">Aucun produit disponible</p>
+                        <p className="empty-message">No products available</p>
                       ) : (
                         <table>
                           <thead>
                             <tr>
                               <th>Image</th>
-                              <th>Nom</th>
-                              <th>Prix</th>
+                              <th>Name</th>
+                              <th>Price</th>
                               <th>Stock</th>
-                              <th>Catégorie</th>
-                              <th>Actions</th>
+                              <th>Category</th>
+                              <th>Stocks</th>
                             </tr>
                           </thead>
                           <tbody>
                             {products.map(product => {
                               // Validation supplémentaire
                               if (!product || typeof product !== 'object') {
-                                console.error('Produit invalide:', product);
+                                console.error('Invalid product:', product);
                                 return null;
                               }
 
@@ -823,35 +814,35 @@ const fetchOrders = useCallback(async () => {
                                 <tr key={product.id || Math.random()}>
                                   <td>
                                     {product.imageUrl ? (
-                                      <img 
-                                        src={product.imageUrl} 
-                                        alt={product.name} 
-                                        width="50" 
+                                      <img
+                                        src={product.imageUrl}
+                                        alt={product.name}
+                                        width="50"
                                         height="50"
                                         style={{ objectFit: 'cover' }}
                                       />
                                     ) : (
-                                      <span>Aucune image</span>
+                                      <span>No images</span>
                                     )}
                                   </td>
-                                  <td>{product.name || 'Nom inconnu'}</td>
-                                  <td>{product.price !== undefined ? `${parseFloat(product.price).toFixed(2)}€` : 'Prix N/A'}</td>
+                                  <td>{product.name || 'Name unknown'}</td>
+                                  <td>{product.price !== undefined ? `${parseFloat(product.price).toFixed(2)}€` : 'Price N/A'}</td>
                                   <td>{product.stock !== undefined ? product.stock : 'Stock N/A'}</td>
-                                  <td>{product.category ? product.category.name : 'Catégorie N/A'}</td>
+                                  <td>{product.category ? product.category.name : 'Category N/A'}</td>
                                   <td>
-                                    <button 
+                                    <button
                                       className="edit-btn"
                                       onClick={() => handleEditProduct(product)}
                                       disabled={loading}
                                     >
-                                      Éditer
+                                      Edit
                                     </button>
-                                    <button 
+                                    <button
                                       className="trash-btn"
                                       onClick={() => handleTrashProduct(product.id)}
                                       disabled={loading}
                                     >
-                                      Corbeille
+                                      Trash
                                     </button>
                                   </td>
                                 </tr>
@@ -866,29 +857,29 @@ const fetchOrders = useCallback(async () => {
                   // Interface de la corbeille
                   <div className="trash-section">
                     <div className="trash-header">
-                      <h3>Corbeille ({trashedProducts.length} produits)</h3>
+                      <h3>Trash ({trashedProducts.length} products)</h3>
                       {trashedProducts.length > 0 && (
-                        <button 
+                        <button
                           className="empty-trash-btn"
                           onClick={handleEmptyTrash}
                           disabled={loading}
                         >
-                          Vider la corbeille
+                          Empty the trash
                         </button>
                       )}
                     </div>
-                    
+
                     {trashedProducts.length === 0 ? (
-                      <p className="empty-message">La corbeille est vide</p>
+                      <p className="empty-message">The trash is empty</p>
                     ) : (
                       <table className="trash-table">
                         <thead>
                           <tr>
                             <th>Image</th>
-                            <th>Nom</th>
-                            <th>Prix</th>
-                            <th>Catégorie</th>
-                            <th>Date de suppression</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Deletion Date</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -897,39 +888,39 @@ const fetchOrders = useCallback(async () => {
                             <tr key={product.id}>
                               <td>
                                 {product.imageUrl ? (
-                                  <img 
-                                    src={product.imageUrl} 
-                                    alt={product.name} 
-                                    width="50" 
+                                  <img
+                                    src={product.imageUrl}
+                                    alt={product.name}
+                                    width="50"
                                     height="50"
                                     style={{ objectFit: 'cover' }}
                                   />
                                 ) : (
-                                  <span>Aucune image</span>
+                                  <span>No images</span>
                                 )}
                               </td>
                               <td>{product.name}</td>
-                              <td>{product.price !== undefined ? `${parseFloat(product.price).toFixed(2)}€` : 'Prix N/A'}</td>
-                              <td>{product.category ? product.category.name : 'Catégorie N/A'}</td>
+                              <td>{product.price !== undefined ? `${parseFloat(product.price).toFixed(2)}€` : 'Price N/A'}</td>
+                              <td>{product.category ? product.category.name : 'Category N/A'}</td>
                               <td>
-                                {product.deletedAt 
-                                  ? new Date(product.deletedAt).toLocaleString() 
-                                  : 'Date inconnue'}
+                                {product.deletedAt
+                                  ? new Date(product.deletedAt).toLocaleString()
+                                  : 'Date unknown'}
                               </td>
                               <td>
-                                <button 
+                                <button
                                   className="restore-btn"
                                   onClick={() => handleRestoreProduct(product.id)}
                                   disabled={loading}
                                 >
-                                  Restaurer
+                                  Restore
                                 </button>
-                                <button 
+                                <button
                                   className="permanent-delete-btn"
                                   onClick={() => handlePermanentlyDeleteProduct(product.id)}
                                   disabled={loading}
                                 >
-                                  Supprimer définitivement
+                                  Permanently delete
                                 </button>
                               </td>
                             </tr>
@@ -942,123 +933,123 @@ const fetchOrders = useCallback(async () => {
               </section>
             )}
 
-{activeSection === 'orders' && (
-  <section className="orders-management">
-    <h2>Gestion des Commandes</h2>
-    <div className="section-header">
-      <button 
-        className="refresh-btn" 
-        onClick={fetchOrders}
-        disabled={loading}
-      >
-        Actualiser les commandes
-      </button>
-    </div>
-
-    {loading && <div className="loading-indicator">Chargement des commandes...</div>}
-    
-    {error && (
-      <div className="error-message">
-        <p>{error}</p>
-        <button onClick={fetchOrders}>Réessayer</button>
-      </div>
-    )}
-
-    {!loading && !error && orders.length === 0 ? (
-      <div className="empty-message">
-        <p>Aucune commande disponible</p>
-        <p className="small-text">Les commandes passées par les utilisateurs apparaîtront ici.</p>
-      </div>
-    ) : (
-      <div className="orders-table-container">
-        <table className="orders-table">
-          <thead>
-            <tr>
-              <th>N° Commande</th>
-              <th>Client</th>
-              <th>Date</th>
-              <th>Total</th>
-              <th>Statut</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map(order => (
-              <tr key={order.id}>
-                <td>#{order.id}</td>
-                <td>
-                  {order.user ? (
-                    <>
-                      <div>{order.user.firstName} {order.user.lastName}</div>
-                      <small>{order.user.email}</small>
-                    </>
-                  ) : (
-                    'Utilisateur inconnu'
-                  )}
-                </td>
-                <td>
-                  {order.orderDate ? 
-                    new Date(order.orderDate).toLocaleDateString('fr-FR') : 
-                    new Date(order.createdAt).toLocaleDateString('fr-FR')}
-                </td>
-                <td>
-                  {typeof order.totalAmount === 'number' 
-                    ? order.totalAmount.toFixed(2) 
-                    : parseFloat(order.totalAmount).toFixed(2)}€
-                </td>
-                <td>
-                  <span className={`status-badge status-${order.status}`}>
-                    {order.status === 'pending' ? 'En attente' : 
-                     order.status === 'processing' ? 'En traitement' : 
-                     order.status === 'shipped' ? 'Expédié' : 
-                     order.status === 'delivered' ? 'Livré' : 
-                     order.status === 'cancelled' ? 'Annulé' : order.status}
-                  </span>
-                </td>
-                <td>
-                  <button 
-                    className="view-btn"
-                    onClick={() => viewOrderDetails(order.id)}
-                  >
-                    Détails
-                  </button>
-                  <select 
-                    value={order.status}
-                    onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
+            {activeSection === 'orders' && (
+              <section className="orders-management">
+                <h2>Order Management</h2>
+                <div className="section-header">
+                  <button
+                    className="refresh-btn"
+                    onClick={fetchOrders}
                     disabled={loading}
-                    className="status-select"
                   >
-                    <option value="pending">En attente</option>
-                    <option value="processing">En traitement</option>
-                    <option value="shipped">Expédié</option>
-                    <option value="delivered">Livré</option>
-                    <option value="cancelled">Annulé</option>
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </section>
-)}
+                    Refresh Orders
+                  </button>
+                </div>
+
+                {loading && <div className="loading-indicator">Loading orders...</div>}
+
+                {error && (
+                  <div className="error-message">
+                    <p>{error}</p>
+                    <button onClick={fetchOrders}>Retry</button>
+                  </div>
+                )}
+
+                {!loading && !error && orders.length === 0 ? (
+                  <div className="empty-message">
+                    <p>No orders available</p>
+                    <p className="small-text">Orders placed by users will appear here.</p>
+                  </div>
+                ) : (
+                  <div className="orders-table-container">
+                    <table className="orders-table">
+                      <thead>
+                        <tr>
+                          <th>Order No.</th>
+                          <th>Customer</th>
+                          <th>Date</th>
+                          <th>Total</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orders.map(order => (
+                          <tr key={order.id}>
+                            <td>#{order.id}</td>
+                            <td>
+                              {order.user ? (
+                                <>
+                                  <div>{order.user.firstName} {order.user.lastName}</div>
+                                  <small>{order.user.email}</small>
+                                </>
+                              ) : (
+                                'Unknown user'
+                              )}
+                            </td>
+                            <td>
+                              {order.orderDate ?
+                                new Date(order.orderDate).toLocaleDateString('fr-FR') :
+                                new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                            </td>
+                            <td>
+                              {typeof order.totalAmount === 'number'
+                                ? order.totalAmount.toFixed(2)
+                                : parseFloat(order.totalAmount).toFixed(2)}€
+                            </td>
+                            <td>
+                              <span className={`status-badge status-${order.status}`}>
+                                {order.status === 'pending' ? 'En attente' :
+                                  order.status === 'processing' ? 'En traitement' :
+                                    order.status === 'shipped' ? 'Expédié' :
+                                      order.status === 'delivered' ? 'Livré' :
+                                        order.status === 'cancelled' ? 'Annulé' : order.status}
+                              </span>
+                            </td>
+                            <td>
+                              <button
+                                className="view-btn"
+                                onClick={() => viewOrderDetails(order.id)}
+                              >
+                                Details
+                              </button>
+                              <select
+                                value={order.status}
+                                onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
+                                disabled={loading}
+                                className="status-select"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Canceled</option>
+                              </select>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            )}
 
             {activeSection === 'users' && (
               <section className="users-management">
-                <h2>Gestion des Utilisateurs ({users.length})</h2>
+                <h2>User Management ({users.length})</h2>
 
                 {users.length === 0 ? (
-                  <p className="empty-message">Aucun utilisateur disponible</p>
+                  <p className="empty-message">No users available</p>
                 ) : (
                   <table>
                     <thead>
                       <tr>
                         <th>ID</th>
-                        <th>Nom</th>
+                        <th>Name</th>
                         <th>Email</th>
-                        <th>Rôle</th>
-                        <th>Date d'inscription</th>
+                        <th>Role</th>
+                        <th>Registration Date</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1069,7 +1060,7 @@ const fetchOrders = useCallback(async () => {
                           <td>{user.email}</td>
                           <td>
                             <span className={`role-badge ${user.isAdmin ? 'role-admin' : 'role-user'}`}>
-                              {user.isAdmin ? 'Admin' : 'Utilisateur'}
+                              {user.isAdmin ? 'Admin' : 'User'}
                             </span>
                           </td>
                           <td>{new Date(user.createdAt).toLocaleDateString()}</td>

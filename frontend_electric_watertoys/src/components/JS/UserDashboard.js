@@ -8,20 +8,22 @@ import Footer from './Footer';
 
 // Fonction qui génère une signature pour une commande
 const generateOrderSignature = (order) => {
-  const items = order.items ? order.items.slice().sort((a, b) => {
-    const aId = a.productId || (a.product && a.product.id) || 0;
-    const bId = b.productId || (b.product && b.product.id) || 0;
-    return aId - bId;
-  }) : [];
+  const items = order.items
+    ? order.items.slice().sort((a, b) => {
+        const aId = a.productId || (a.product && a.product.id) || 0;
+        const bId = b.productId || (b.product && b.product.id) || 0;
+        return aId - bId;
+      })
+    : [];
 
   const signatureObj = {
     totalAmount: order.totalAmount,
     orderDate: order.orderDate,
-    items: items.map(item => ({
+    items: items.map((item) => ({
       productId: item.productId || (item.product && item.product.id) || null,
       quantity: item.quantity,
-      price: item.unitPrice || (item.product && item.product.price) || null
-    }))
+      price: item.unitPrice || (item.product && item.product.price) || null,
+    })),
   };
   return JSON.stringify(signatureObj);
 };
@@ -42,29 +44,29 @@ const UserDashboard = () => {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem('token');
-      console.log("Récupération du panier avec le token:", token);
+      console.log("Retrieving cart with token:", token);
 
       // Vérifier si le panier vient d'être vidé après une commande
       const cartCleared = localStorage.getItem('cartCleared');
       if (cartCleared === 'true') {
-        console.log("Le panier a été vidé suite à une commande");
+        console.log("Cart cleared after order placement");
         setCart([]);
         localStorage.removeItem('cartCleared');
         return;
       }
       
       const response = await axios.get('http://localhost:5000/api/cart', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       
-      console.log("Panier récupéré:", response.data);
+      console.log("Cart retrieved:", response.data);
       setCart(response.data.items || []);
     } catch (error) {
-      console.error('Erreur lors de la récupération du panier:', error);
-      setError('Impossible de récupérer votre panier. Veuillez réessayer.');
+      console.error('Error retrieving cart:', error);
+      setError('Unable to retrieve your cart. Please try again.');
       
       if (error.response && error.response.status === 401) {
-        alert('Votre session a expiré. Veuillez vous reconnecter.');
+        alert('Your session has expired. Please log in again.');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         navigate('/login');
@@ -95,7 +97,7 @@ const UserDashboard = () => {
         
         if (Array.isArray(response.data)) {
           apiOrders = response.data;
-          console.log("Commandes récupérées depuis l'API:", apiOrders);
+          console.log("Orders retrieved from API:", apiOrders);
         }
       }
 
@@ -113,76 +115,74 @@ const UserDashboard = () => {
       uniqueOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
       
       setOrders(uniqueOrders);
-      console.log("Total des commandes (API uniquement, uniques):", uniqueOrders.length);
+      console.log("Total unique orders (API only):", uniqueOrders.length);
       
     } catch (error) {
-      console.error('Erreur lors de la récupération des commandes:', error);
-      setError('Impossible de récupérer vos commandes. Veuillez réessayer.');
+      console.error('Error retrieving orders:', error);
+      setError('Unable to retrieve your orders. Please try again.');
     } finally {
       setLoading(false);
     }
   }, []);
 
   // Supprimer une commande réelle et ses doublons basés sur la signature
-const deleteRealOrder = useCallback(async (orderId) => {
-  if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.")) {
-    try {
-      setLoading(true);
-      setError(null);
-      const token = localStorage.getItem('token');
+  const deleteRealOrder = useCallback(async (orderId) => {
+    if (window.confirm("Are you sure you want to delete this order? This action is irreversible.")) {
+      try {
+        setLoading(true);
+        setError(null);
+        const token = localStorage.getItem('token');
 
-      // Récupérer l'objet commande à supprimer
-      const orderToDelete = orders.find(o => o.id.toString() === orderId.toString());
-      if (!orderToDelete) {
-        alert("Commande introuvable.");
-        return;
-      }
-      
-      // Trouver tous les doublons de cette commande
-      const signature = generateOrderSignature(orderToDelete);
-      const duplicates = orders.filter(o => 
-        generateOrderSignature(o) === signature
-      );
-      
-      console.log(`Suppression de la commande ${orderId} et de ses ${duplicates.length - 1} doublons.`);
-      
-      // Supprimer tous les doublons y compris l'original
-      let successCount = 0;
-      for (const order of duplicates) {
-        try {
-          await axios.delete(`http://localhost:5000/api/orders/${order.id}`, {
-            headers: { 
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+        // Récupérer l'objet commande à supprimer
+        const orderToDelete = orders.find(o => o.id.toString() === orderId.toString());
+        if (!orderToDelete) {
+          alert("Order not found.");
+          return;
+        }
+        
+        // Trouver tous les doublons de cette commande
+        const signature = generateOrderSignature(orderToDelete);
+        const duplicates = orders.filter(o => generateOrderSignature(o) === signature);
+        
+        console.log(`Deleting order ${orderId} and its ${duplicates.length - 1} duplicate(s).`);
+        
+        // Supprimer tous les doublons y compris l'original
+        let successCount = 0;
+        for (const order of duplicates) {
+          try {
+            await axios.delete(`http://localhost:5000/api/orders/${order.id}`, {
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            successCount++;
+          } catch (err) {
+            console.error(`Error deleting order id ${order.id}:`, err);
+            
+            // Si c'est l'original qui a échoué, afficher une erreur spécifique
+            if (order.id.toString() === orderId.toString()) {
+              setError(`Unable to delete the main order (ID: ${orderId})`);
             }
-          });
-          successCount++;
-        } catch (err) {
-          console.error(`Erreur lors de la suppression de la commande id ${order.id}:`, err);
-          
-          // Si c'est l'original qui a échoué, afficher une erreur spécifique
-          if (order.id.toString() === orderId.toString()) {
-            setError(`Impossible de supprimer la commande principale (ID: ${orderId})`);
           }
         }
+        
+        // Rafraîchir la liste des commandes
+        await fetchOrders();
+        
+        if (successCount > 0) {
+          alert(`${successCount} order(s) successfully deleted!`);
+        } else {
+          setError("No orders could be deleted.");
+        }
+      } catch (error) {
+        console.error('Error deleting order:', error);
+        setError('Error while deleting the order.');
+      } finally {
+        setLoading(false);
       }
-      
-      // Rafraîchir la liste des commandes
-      await fetchOrders();
-      
-      if (successCount > 0) {
-        alert(`${successCount} commande(s) supprimée(s) avec succès!`);
-      } else {
-        setError("Aucune commande n'a pu être supprimée.");
-      }
-    } catch (error) {
-      console.error('Erreur lors de la suppression de la commande:', error);
-      setError('Erreur lors de la suppression de la commande.');
-    } finally {
-      setLoading(false);
     }
-  }
-}, [fetchOrders, orders]);
+  }, [fetchOrders, orders]);
 
   // Supprimer un article du panier
   const removeFromCart = useCallback(async (itemId) => {
@@ -191,9 +191,9 @@ const deleteRealOrder = useCallback(async (orderId) => {
       setError(null);
       const token = localStorage.getItem('token');
       
-      console.log(`Suppression de l'article ${itemId} du panier`);
-      console.log("URL de la requête:", `http://localhost:5000/api/cart/items/${itemId}`);
-      console.log("Token utilisé:", token);
+      console.log(`Removing item ${itemId} from cart`);
+      console.log("Request URL:", `http://localhost:5000/api/cart/items/${itemId}`);
+      console.log("Using token:", token);
       
       const response = await axios.delete(
         `http://localhost:5000/api/cart/items/${itemId}`, 
@@ -205,20 +205,20 @@ const deleteRealOrder = useCallback(async (orderId) => {
         }
       );
       
-      console.log("Réponse de la suppression:", response.data);
+      console.log("Deletion response:", response.data);
       fetchCart();
     } catch (error) {
-      console.error('Erreur lors de la suppression de l\'article:', error);
+      console.error('Error removing item:', error);
       
       if (error.response) {
         console.error('Status code:', error.response.status);
-        console.error('Données de réponse:', error.response.data);
+        console.error('Response data:', error.response.data);
       }
       
-      setError('Impossible de supprimer l\'article. Veuillez réessayer.');
+      setError('Unable to remove the item. Please try again.');
       
       if (error.response && error.response.status === 401) {
-        alert('Votre session a expiré. Veuillez vous reconnecter.');
+        alert('Your session has expired. Please log in again.');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         navigate('/login');
@@ -239,10 +239,10 @@ const deleteRealOrder = useCallback(async (orderId) => {
       setError(null);
       const token = localStorage.getItem('token');
       
-      console.log(`Mise à jour de l'article ${itemId} avec quantité ${newQuantity}`);
-      console.log("URL de la requête:", `http://localhost:5000/api/cart/items/${itemId}`);
-      console.log("Données envoyées:", { quantity: newQuantity });
-      console.log("Token utilisé:", token);
+      console.log(`Updating item ${itemId} quantity to ${newQuantity}`);
+      console.log("Request URL:", `http://localhost:5000/api/cart/items/${itemId}`);
+      console.log("Data sent:", { quantity: newQuantity });
+      console.log("Using token:", token);
       
       const response = await axios.put(
         `http://localhost:5000/api/cart/items/${itemId}`, 
@@ -255,20 +255,20 @@ const deleteRealOrder = useCallback(async (orderId) => {
         }
       );
       
-      console.log("Réponse de la mise à jour:", response.data);
+      console.log("Update response:", response.data);
       fetchCart();
     } catch (error) {
-      console.error('Erreur lors de la mise à jour de la quantité:', error);
+      console.error('Error updating quantity:', error);
       
       if (error.response) {
         console.error('Status code:', error.response.status);
-        console.error('Données de réponse:', error.response.data);
+        console.error('Response data:', error.response.data);
       }
       
-      setError('Impossible de mettre à jour la quantité. Veuillez réessayer.');
+      setError('Unable to update the quantity. Please try again.');
       
       if (error.response && error.response.status === 401) {
-        alert('Votre session a expiré. Veuillez vous reconnecter.');
+        alert('Your session has expired. Please log in again.');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         navigate('/login');
@@ -280,7 +280,7 @@ const deleteRealOrder = useCallback(async (orderId) => {
 
   // Vider complètement le panier
   const clearCart = useCallback(async () => {
-    if (window.confirm("Êtes-vous sûr de vouloir vider votre panier ?")) {
+    if (window.confirm("Are you sure you want to empty your cart?")) {
       try {
         setLoading(true);
         setError(null);
@@ -297,10 +297,10 @@ const deleteRealOrder = useCallback(async (orderId) => {
         );
         
         setCart([]);
-        alert('Votre panier a été vidé avec succès.');
+        alert('Your cart has been successfully emptied.');
       } catch (error) {
-        console.error('Erreur lors du vidage du panier:', error);
-        setError('Impossible de vider le panier. Veuillez réessayer.');
+        console.error('Error emptying the cart:', error);
+        setError('Unable to empty the cart. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -320,8 +320,8 @@ const deleteRealOrder = useCallback(async (orderId) => {
         } 
       });
     } catch (error) {
-      console.error('Erreur lors de la préparation du paiement:', error);
-      setError('Erreur lors de la préparation du paiement. Veuillez réessayer.');
+      console.error('Error preparing payment:', error);
+      setError('Error while preparing the payment. Please try again.');
     }
   }, [cart, navigate]);
 
@@ -339,7 +339,7 @@ const deleteRealOrder = useCallback(async (orderId) => {
 
   // Rafraîchir manuellement les commandes
   const refreshOrders = () => {
-    console.log("Rafraîchissement manuel des commandes");
+    console.log("Manual refresh of orders");
     fetchOrders();
   };
 
@@ -367,7 +367,7 @@ const deleteRealOrder = useCallback(async (orderId) => {
     
     if (sectionParam === 'orders' && refreshParam === 'true') {
       setActiveTab('orders');
-      console.log("Rafraîchissement des commandes demandé explicitement");
+      console.log("Explicit orders refresh requested");
       fetchOrders();
       navigate('/dashboard', { replace: true });
     } else {
@@ -388,40 +388,40 @@ const deleteRealOrder = useCallback(async (orderId) => {
       
       <div className="dashboard-container">
         <div className="sidebar">
-          <h2>Mon Compte</h2>
+          <h2>My Account</h2>
           <ul>
             <li 
               className={activeTab === 'profile' ? 'active' : ''}
               onClick={() => setActiveTab('profile')}
             >
-              Profil
+              Profile
             </li>
             <li 
               className={activeTab === 'cart' ? 'active' : ''}
               onClick={() => setActiveTab('cart')}
             >
-              Mon Panier ({cart.length})
+              My Cart ({cart.length})
             </li>
             <li 
               className={activeTab === 'orders' ? 'active' : ''}
               onClick={() => setActiveTab('orders')}
             >
-              Mes Commandes
+              My Orders
             </li>
-            <li onClick={handleLogout}>Déconnexion</li>
+            <li onClick={handleLogout}>Logout</li>
           </ul>
         </div>
         
         <div className="content">
           {error && <div className="error-message">{error}</div>}
-          {loading && <div className="loading-spinner">Chargement...</div>}
+          {loading && <div className="loading-spinner">Loading...</div>}
           
           {activeTab === 'profile' && (
             <div className="profile-tab">
-              <h2>Mon Profil</h2>
+              <h2>My Profile</h2>
               <div className="profile-info">
-                <p><strong>Nom:</strong> {user.lastName}</p>
-                <p><strong>Prénom:</strong> {user.firstName}</p>
+                <p><strong>Last Name:</strong> {user.lastName}</p>
+                <p><strong>First Name:</strong> {user.firstName}</p>
                 <p><strong>Email:</strong> {user.email}</p>
               </div>
             </div>
@@ -430,25 +430,25 @@ const deleteRealOrder = useCallback(async (orderId) => {
           {activeTab === 'cart' && (
             <div className="cart-tab">
               <h2>
-                Mon Panier
+                My Cart
                 {cart.length > 0 && (
                   <button 
                     className="empty-cart-btn"
                     onClick={clearCart}
                     disabled={loading}
                   >
-                    Vider mon panier
+                    Empty My Cart
                   </button>
                 )}
               </h2>
               {cart.length === 0 ? (
                 <div className="empty-cart-message">
-                  <p>Votre panier est vide.</p>
+                  <p>Your cart is empty.</p>
                   <button 
                     className="shop-now-btn"
                     onClick={() => navigate('/product')}
                   >
-                    Découvrir nos produits
+                    Browse Products
                   </button>
                 </div>
               ) : (
@@ -457,9 +457,9 @@ const deleteRealOrder = useCallback(async (orderId) => {
                     <table>
                       <thead>
                         <tr>
-                          <th>Produit</th>
-                          <th>Prix</th>
-                          <th>Quantité</th>
+                          <th>Product</th>
+                          <th>Price</th>
+                          <th>Quantity</th>
                           <th>Total</th>
                           <th>Actions</th>
                         </tr>
@@ -495,7 +495,7 @@ const deleteRealOrder = useCallback(async (orderId) => {
                                 onClick={() => removeFromCart(item.id)}
                                 disabled={loading}
                               >
-                                Supprimer
+                                Remove
                               </button>
                             </td>
                           </tr>
@@ -514,7 +514,7 @@ const deleteRealOrder = useCallback(async (orderId) => {
                       onClick={checkout}
                       disabled={loading}
                     >
-                      Valider ma commande
+                      Proceed to Checkout
                     </button>
                   </div>
                 </>
@@ -525,23 +525,23 @@ const deleteRealOrder = useCallback(async (orderId) => {
           {activeTab === 'orders' && (
             <div className="orders-tab">
               <h2>
-                Mes Commandes
+                My Orders
                 <button 
                   className="refresh-orders-btn"
                   onClick={refreshOrders}
                   disabled={loading}
                 >
-                  ↻ Actualiser
+                  ↻ Refresh
                 </button>
               </h2>
               {orders.length === 0 ? (
                 <div className="no-orders">
-                  <p>Vous n'avez pas encore passé de commande.</p>
+                  <p>You haven't placed any orders yet.</p>
                   <button 
                     className="shop-now-btn"
                     onClick={() => navigate('/product')}
                   >
-                    Découvrir nos produits
+                    Browse Products
                   </button>
                 </div>
               ) : (
@@ -549,9 +549,9 @@ const deleteRealOrder = useCallback(async (orderId) => {
                   <table>
                     <thead>
                       <tr>
-                        <th>Numéro</th>
+                        <th>Order #</th>
                         <th>Date</th>
-                        <th>Statut</th>
+                        <th>Status</th>
                         <th>Total</th>
                         <th>Actions</th>
                       </tr>
@@ -572,18 +572,18 @@ const deleteRealOrder = useCallback(async (orderId) => {
                               className="details-btn"
                               onClick={() => viewOrderDetails(order.id)}
                             >
-                              Détails
+                              Details
                             </button>
                             
                             <button 
                               className="delete-order-btn"
                               onClick={() => deleteRealOrder(order.id)}
                               disabled={loading || (order.status && order.status !== 'pending')}
-                              title={order.status && order.status !== 'pending' ? 
-                                "Seules les commandes en attente peuvent être supprimées" : 
-                                "Supprimer la commande"}
+                              title={order.status && order.status !== 'pending'
+                                ? "Only pending orders can be deleted"
+                                : "Delete order"}
                             >
-                              Supprimer
+                              Delete
                             </button>
                           </td>
                         </tr>
